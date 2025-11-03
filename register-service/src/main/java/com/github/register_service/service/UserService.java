@@ -24,7 +24,7 @@ public class UserService {
     private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public String encrypt(String password) {
+    private String encrypt(String password) {
         return passwordEncoder.encode(password);
     }
 
