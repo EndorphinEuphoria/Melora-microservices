@@ -82,7 +82,7 @@ public class UserService {
         }
 
         if (user.getLName() != null && !user.getLName().trim().isBlank()) {
-            newUserInfo.setLName(newUserInfo.getLName());
+            newUserInfo.setLName(user.getLName());
         }
 
         if (user.getNickname() != null && !user.getNickname().trim().isBlank()) {
@@ -97,7 +97,7 @@ public class UserService {
             newUserInfo.setPassword(encrypt(user.getPassword()));
         }
 
-        // TODO CAMBIAR, NO CREO QUE FUNCIONE :(
+        // TODO: CAMBIAR, NO CREO QUE FUNCIONE :(
         if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().trim().isBlank()) {
             newUserInfo.setProfilePhotoUrl(user.getProfilePhotoUrl());
         }
