@@ -15,9 +15,10 @@ public class UploadController {
 
     private final UploadService uploadService;
 
+    // Utilizar para crear 
     @PostMapping("/full")
     public ResponseEntity<Map<String, Long>> uploadSong(@RequestBody UploadRequestDto dto) {
         Map<String, Long> response = uploadService.uploadSong(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+    }   
 }

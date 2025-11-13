@@ -71,4 +71,9 @@ public class SongService {
     public void deleteById(Long id) {
         songRepository.deleteById(id);
     }
+
+    public boolean existsById(Long songId) {
+    return songRepository.existsById(songId);
+}
+
 }

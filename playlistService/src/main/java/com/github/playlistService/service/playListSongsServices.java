@@ -22,16 +22,17 @@ public class playListSongsServices {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String SONG_SERVICE_URL = "http://localhost:8082/api-v1/songs/";
 
+    private static final String SONG_SERVICE_URL = "http://localhost:8084/api-v1/songs/exists/";
+    
     public boolean songExists(Long songId) {
-        try {
-            Object song = restTemplate.getForObject(SONG_SERVICE_URL + songId, Object.class);
-            return song != null;
-        } catch (Exception e) {
-            return false;
-        }
+    try {
+        Boolean exists = restTemplate.getForObject(SONG_SERVICE_URL + songId, Boolean.class);
+        return exists != null && exists;
+    } catch (Exception e) {
+        return false;
     }
+}
 
     public playListSongs addSongToPlaylist(playList playlist, Long songId) {
         if (!songExists(songId)) {

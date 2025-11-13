@@ -29,6 +29,13 @@ public class SongController {
         return songService.getAllDetailed();
     }
 
+    @GetMapping("/exists/{songId}")
+    public boolean exists(@PathVariable Long songId) {
+    return songService.existsById(songId);
+}
+
+
+
     // Buscar por nombre
     @GetMapping("/search")
     public List<SongDetailedDto> search(@RequestParam(defaultValue = "") String q) {

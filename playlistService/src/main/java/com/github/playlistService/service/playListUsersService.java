@@ -22,7 +22,7 @@ public class playListUsersService {
     @Autowired
     private RestTemplate restTemplate;
 
-    private final String USER_SERVICE_URL = "http://localhost:8082/api-v1/register/exists/";
+   private final String USER_SERVICE_URL ="http://localhost:8082/api-v1/register/exists/";
 
    public UserDto getUserById(Long userId) {
     try {
