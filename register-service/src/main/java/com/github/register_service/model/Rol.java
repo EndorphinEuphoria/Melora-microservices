@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Rol extends RepresentationModel<Rol> { // para los hyperlinks en las responses
+public class Rol extends RepresentationModel<Rol> { 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRol;

@@ -41,34 +41,36 @@ public class UserService {
     }
 
     public Optional<User> getByMail(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isEmpty()) {
-            throw new EntityNotFoundException("Usuario no existe.");
-        }
-        return user;
-    }
+    return userRepository.findByEmail(email);
+}
+
 
     public void deleteUserById(Long idUsuario) {
         User exist = userRepository.findById(idUsuario).orElseThrow(() -> new EntityNotFoundException("Usuario a eliminar no existe."));
         userRepository.delete(exist);
     }
 
-    public User saveUser(User user) {
-        User userToSave = new User();
-        if (findRol(user.getRol().getIdRol()) == null) {
-            throw new EntityNotFoundException("Rol no encontrado.");
-        }
+   public User saveUser(User user) {
+    User userToSave = new User();
 
-        userToSave.setName(user.getName());
-        userToSave.setLName(user.getLName());
-        userToSave.setNickname(user.getNickname());
-        userToSave.setEmail(user.getEmail());
-        userToSave.setPassword(passwordEncoder.encode(user.getPassword()));
-        userToSave.setRol(user.getRol());
-        userToSave.setProfilePhotoUrl(user.getProfilePhotoUrl());
-        return userRepository.save(userToSave);
-        
+    Rol rol;
+    if (user.getRol() == null || user.getRol().getIdRol() == null) {
+        rol = rolRepository.findById(1L)
+                .orElseThrow(() -> new EntityNotFoundException("Rol con ID 1 no encontrado."));
+    } else {
+        rol = findRol(user.getRol().getIdRol());
     }
+
+    userToSave.setName(user.getName());
+    userToSave.setLName(user.getLName());
+    userToSave.setNickname(user.getNickname());
+    userToSave.setEmail(user.getEmail());
+    userToSave.setPassword(passwordEncoder.encode(user.getPassword()));
+    userToSave.setRol(rol);
+    userToSave.setProfilePhotoUrl(user.getProfilePhotoUrl());
+
+    return userRepository.save(userToSave);
+}
 
     public User findUserById(Long idUser) {
         return userRepository.findById(idUser)

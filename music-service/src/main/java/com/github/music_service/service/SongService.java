@@ -1,67 +1,74 @@
 package com.github.music_service.service;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
+import com.github.music_service.dto.SongDetailedDto;
 import com.github.music_service.model.Song;
 import com.github.music_service.repository.SongRepository;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-@Transactional
+import java.util.*;
+
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class SongService {
 
     private final SongRepository songRepository;
+    private final UserClientService userClientService; 
 
+    public Long create(Song song) {
+        if (song.getSongName() == null || song.getSongName().isBlank())
+            throw new IllegalArgumentException("The Song name cannot be empty");
+        if (song.getSongPath() == null || song.getSongPath().isBlank())
+            throw new IllegalArgumentException("Song path is required");
+        if (song.getSongDuration() == null || song.getSongDuration() <= 0)
+            throw new IllegalArgumentException("Song duration must be > 0");
 
-    // TODO: control null exceptions with optional.empty()
-    public List<Song> getAllSongs() {
-        return songRepository.findAll();
+        if (song.getCreationDate() == null) {
+            song.setCreationDate(System.currentTimeMillis());
+        }
+
+        Song saved = songRepository.save(song);
+        return saved.getIdSong();
     }
 
-    // Get song by id
-    public Song getSongById(Long idSong) {
-        return songRepository.findById(idSong).orElseThrow(() -> new RuntimeException("Song not found."));
+
+    public List<SongDetailedDto> getAllDetailed() {
+        List<SongDetailedDto> songs = songRepository.findAllDetailed();
+        songs.forEach(s -> s.setNickname(userClientService.getNicknameByUserId(s.getArtistId())));
+        return songs;
     }
 
-    // Get song by name TODO: format songName (trim().isnotblank etc.)
-    public Song getSongByName(String songName) {
-        return songRepository.getByNameOptional(songName).orElseThrow(() -> new RuntimeException("Song not found."));
+    public List<SongDetailedDto> searchByName(String q) {
+        List<SongDetailedDto> songs = songRepository.searchByName(q == null ? "" : q);
+        songs.forEach(s -> s.setNickname(userClientService.getNicknameByUserId(s.getArtistId())));
+        return songs;
     }
 
-    // update Song info
-    public Song updateSong(Song song) {
-        Song newSongInfo = songRepository.findById(song.getIdSong()).orElseThrow(() -> new RuntimeException("Song not found."));
-        if (song.getSongName() != null && !song.getSongName().trim().isBlank()) {
-            newSongInfo.setSongName(song.getSongName());
-        }
-
-        if (song.getSongDescription() != null && !song.getSongDescription().trim().isBlank()) {
-            newSongInfo.setSongDescription(song.getSongDescription());
-        }
-
-        if (song.getSongPath() != null && !song.getSongPath().trim().isBlank()) {
-            newSongInfo.setSongPath(song.getSongPath());
-        }
-
-        if (song.getCoverArt() != null && !song.getCoverArt().trim().isBlank()) {
-            newSongInfo.setCoverArt(song.getCoverArt());
-        }
-
-        // TODO: delete, may not be necessary
-        // if (song.getSongDuration() != null) {
-        //     newSongInfo.setSongDuration(0);
-        // }
-        return songRepository.save(newSongInfo);
+    public List<SongDetailedDto> getByArtist(Long artistId) {
+        List<SongDetailedDto> songs = songRepository.findByArtist(artistId);
+        songs.forEach(s -> s.setNickname(userClientService.getNicknameByUserId(s.getArtistId())));
+        return songs;
     }
 
-    public void deleteSong(Long idSong) {
-        if (songRepository.existsById(idSong)) {
-            songRepository.deleteById(idSong);
-        }
+    public SongDetailedDto getDetailedById(Long songId) {
+        SongDetailedDto dto = songRepository.getDetailedById(songId);
+        dto.setNickname(userClientService.getNicknameByUserId(dto.getArtistId()));
+        return dto;
+    }
+
+    public long count() { return songRepository.count(); }
+
+    public void updatePartial(Long songId, String newName, String newDescription) {
+        Song s = songRepository.findById(songId)
+                .orElseThrow(() -> new NoSuchElementException("Song not found"));
+        if (newName != null) s.setSongName(newName);
+        if (newDescription != null) s.setSongDescription(newDescription);
+        songRepository.save(s);
+    }
+
+    public void deleteById(Long id) {
+        songRepository.deleteById(id);
     }
 }

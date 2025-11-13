@@ -1,24 +1,13 @@
 package com.github.music_service.controller;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.github.music_service.dto.SongDetailedDto;
 import com.github.music_service.model.Song;
 import com.github.music_service.service.SongService;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-
-
+import java.util.*;
 
 @RestController
 @RequestMapping("api-v1/songs")
@@ -27,29 +16,57 @@ public class SongController {
 
     private final SongService songService;
 
+    // Crear canción (cliente-orquesta envía name, path, coverArt?, description?, duration, creationDate?)
+    @PostMapping
+    public ResponseEntity<Map<String, Long>> create(@RequestBody Song song) {
+        Long id = songService.create(song);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("songId", id));
+    }
+
+    // Listar todas detalladas
     @GetMapping
-    public ResponseEntity<List<Song>> getAllSongs() {
-        return ResponseEntity.status(HttpStatus.OK).body(songService.getAllSongs());
+    public List<SongDetailedDto> all() {
+        return songService.getAllDetailed();
     }
 
-    @GetMapping("/{idSong}")
-    public ResponseEntity<Song> getSongById(@PathVariable Long idSong) {
-        return ResponseEntity.status(HttpStatus.OK).body(songService.getSongById(idSong));
+    // Buscar por nombre
+    @GetMapping("/search")
+    public List<SongDetailedDto> search(@RequestParam(defaultValue = "") String q) {
+        return songService.searchByName(q);
     }
 
-    @GetMapping("/{songName}")
-    public ResponseEntity<Song> getSongByName(@PathVariable String songName) {
-        return ResponseEntity.status(HttpStatus.OK).body(songService.getSongByName(songName));
+    // Obtener por id (detallado)
+    @GetMapping("/{songId}")
+    public SongDetailedDto byId(@PathVariable Long songId) {
+        return songService.getDetailedById(songId);
     }
 
-    @PutMapping("/update/{idSong}")
-    public ResponseEntity<Song> updateSong(@PathVariable Long idSong, @RequestBody Song song) {
-        return ResponseEntity.status(HttpStatus.OK).body(songService.updateSong(song));
+    // Listar por artista
+    @GetMapping("/artist/{artistId}")
+    public List<SongDetailedDto> byArtist(@PathVariable Long artistId) {
+        return songService.getByArtist(artistId);
     }
-    
-    @DeleteMapping("/delete/{idSong}")
-    public ResponseEntity<Void> deleteSong(@PathVariable Long idSong) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
+    // Actualización parcial (name/description)
+    @PatchMapping("/{songId}")
+    public ResponseEntity<Void> patch(
+            @PathVariable Long songId,
+            @RequestBody Map<String, String> body
+    ) {
+        songService.updatePartial(songId, body.get("songName"), body.get("songDescription"));
+        return ResponseEntity.noContent().build();
     }
-    
+
+    // Eliminar por id
+    @DeleteMapping("/{songId}")
+    public ResponseEntity<Void> delete(@PathVariable Long songId) {
+        songService.deleteById(songId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Contador simple
+    @GetMapping("/count")
+    public Map<String, Long> count() {
+        return Map.of("count", songService.count());
+    }
 }

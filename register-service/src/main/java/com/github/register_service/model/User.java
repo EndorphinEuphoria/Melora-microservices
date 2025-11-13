@@ -3,6 +3,7 @@ package com.github.register_service.model;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,7 +33,8 @@ public class User extends RepresentationModel<User> {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "l_name",nullable = false, length = 50)
+    @JsonProperty("lName")
     private String lName;
 
     @Column(nullable = false, length = 50)
@@ -41,14 +43,14 @@ public class User extends RepresentationModel<User> {
     @Column(nullable = false, length = 100, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 255)
     private String password;
 
     @Column(nullable = true, length = 255)
     private String profilePhotoUrl;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "idRol")
+    @JoinColumn(name = "id_rol")
     @JsonIgnoreProperties("users")
     private Rol rol;
 }

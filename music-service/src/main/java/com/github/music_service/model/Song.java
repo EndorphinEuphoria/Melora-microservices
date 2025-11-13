@@ -20,11 +20,11 @@ public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long idSong;
- // TODO añadir lenght a todo
+ 
     @Column(nullable = false)
-    public String SongName;
+    public String songName;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     public String songDescription;
     
     @Column(nullable = false)
@@ -34,7 +34,7 @@ public class Song {
     public String coverArt;
     
     @Column(nullable = false)
-    public int songDuration;
+    public Integer songDuration;
     
     @Column(nullable = false)
     public Long creationDate;
