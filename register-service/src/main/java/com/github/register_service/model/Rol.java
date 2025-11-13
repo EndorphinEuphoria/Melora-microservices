@@ -6,18 +6,9 @@ import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "rol")
@@ -25,15 +16,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@Schema(description = "Entidad que representa el rol de un usuario dentro del sistema")
 public class Rol extends RepresentationModel<Rol> { 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único del rol", example = "1")
     private Long idRol;
 
     @Column(nullable = false, length = 20)
+    @Schema(description = "Nombre del rol", example = "ADMIN")
     private String nombre;
 
     @OneToMany(mappedBy = "rol", cascade = CascadeType.ALL)
     @JsonIgnore
+    @Schema(description = "Lista de usuarios asociados a este rol (oculta en la serialización)")
     List<User> users;
 }

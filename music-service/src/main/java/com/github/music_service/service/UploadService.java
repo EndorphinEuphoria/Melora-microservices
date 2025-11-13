@@ -31,7 +31,7 @@ public class UploadService {
         if (dto.getUserId() == null)
             throw new IllegalArgumentException("User ID cannot be null");
 
-        // Validar existencia del usuario (REST → user-service)
+        // Validar existencia del usuario 
         String nickname = userClientService.getNicknameByUserId(dto.getUserId());
         if (nickname.equals("Desconocido")) {
             throw new IllegalArgumentException("User not found or unavailable in user-service");

@@ -1,26 +1,23 @@
 package com.github.playlistService.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "acceso")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
+@Schema(description = "Modelo que representa el nivel de acceso de una playlist")
 public class acceso {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único del nivel de acceso", example = "1")
     private Long idAcceso;
-    
+
     @Column(nullable = false)
-    private String nombre; 
+    @Schema(description = "Nombre del nivel de acceso (público, privado, oculto, etc.)", example = "publico")
+    private String nombre;
 }

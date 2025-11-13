@@ -1,5 +1,6 @@
 package com.github.music_service.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,26 +17,35 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Entidad que representa una canción en el sistema.")
+
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long idSong;
- 
+    @Schema(description = "ID único de la canción")
+    private Long idSong;
+
     @Column(nullable = false)
-    public String songName;
+    @Schema(description = "Nombre de la canción", example = "Shape of You")
+    private String songName;
 
     @Column(nullable = true)
-    public String songDescription;
-    
+    @Schema(description = "Descripción de la canción", example = "Versión acústica")
+    private String songDescription;
+
     @Column(nullable = false)
-    public String songPath;
-    
+    @Schema(description = "Ruta del archivo de audio", example = "/music/song123.mp3")
+    private String songPath;
+
     @Column
-    public String coverArt;
-    
+    @Schema(description = "Imagen de portada de la canción", example = "/images/cover123.png")
+    private String coverArt;
+
     @Column(nullable = false)
-    public Integer songDuration;
-    
+    @Schema(description = "Duración de la canción en segundos", example = "240")
+    private Integer songDuration;
+
     @Column(nullable = false)
-    public Long creationDate;
+    @Schema(description = "Fecha de creación en formato timestamp", example = "1715123456123")
+    private Long creationDate;
 }
