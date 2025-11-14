@@ -43,30 +43,37 @@ public class UserController {
     @ApiResponses(value = {
     @ApiResponse(responseCode = "201", description = "CREATED: indica que el usuario ha sido creado con éxito.", content = @Content(schema = @Schema(implementation = User.class))),
     @ApiResponse(responseCode = "400", description = "BAD REQUEST: indica que el usuario ya existe.", content = @Content(schema = @Schema(implementation = User.class)))})
-    @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody User user) {
-        try {
-            if (userService.getByMail(user.getEmail()) != null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Correo en uso, por favor utilice otro.");
-            }
-            userService.saveUser(user);
-            User newUser = userService.getByMail(user.getEmail()).get();
-
-
-            Map<String, Object> body = new LinkedHashMap<>();
-            body.put("mensaje", "Usuario creado correctamente.");
-
-
-            EntityModel<Map<String,Object>> resource = EntityModel.of(body);
-            resource.add(linkTo(methodOn(UserController.class).existsById(newUser.getIdUser())).withSelfRel());
-            resource.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("todos"));
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(resource);
-
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+   @PostMapping("/add")
+public ResponseEntity<?> addUser(@RequestBody User user) {
+    try {
+        if (userService.getByMail(user.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Correo en uso, por favor utilice otro.");
         }
+
+        User newUser = userService.saveUser(user);
+
+        // Crear cuerpo de respuesta
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("mensaje", "Usuario creado correctamente.");
+        body.put("usuario", newUser);
+
+        EntityModel<Map<String, Object>> resource = EntityModel.of(body);
+        resource.add(linkTo(methodOn(UserController.class)
+                .existsById(newUser.getIdUser())).withSelfRel());
+        resource.add(linkTo(methodOn(UserController.class)
+                .getAllUsers()).withRel("todos"));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resource);
+
+    } catch (DataIntegrityViolationException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Error: El correo o nickname ya está en uso.");
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error inesperado: " + e.getMessage());
     }
+}
 
     @Operation( summary = "Este endpoint permite comprobar la existencia de un usuario por email.")
     @ApiResponses(value = {
@@ -116,17 +123,22 @@ public class UserController {
         @ApiResponse(responseCode = "200", description = "OK: indica que el usuario ha sido borrado con éxito", content = @Content(schema = @Schema(implementation = User.class))),
         @ApiResponse(responseCode = "404", description = "NOT FOUND: indica que el usuario no ha sido encontrado.", content = @Content(schema = @Schema(implementation = String.class)))
     })
-    @DeleteMapping("/delete/{idUser}")
-    public ResponseEntity<?> deleteById(@PathVariable Long idUser) {
-        try {
-            userService.deleteUserById(idUser);
-            EntityModel<String> response = EntityModel.of("El usuario ha sido borrado con éxito.");
-            response.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("todos"));
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+   @DeleteMapping("/delete/{idUser}")
+public ResponseEntity<?> deleteById(@PathVariable Long idUser) {
+    try {
+        userService.deleteUserById(idUser);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("message", "El usuario ha sido borrado con éxito.");
+
+        EntityModel<Map<String, Object>> resource = EntityModel.of(body);
+        resource.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("todos"));
+
+        return ResponseEntity.status(HttpStatus.OK).body(resource);
+    } catch (EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+}
 
     @Operation( summary = "Este endpoint permite actualizar información de un usuario a través de su ID.")
     @ApiResponses(value = {

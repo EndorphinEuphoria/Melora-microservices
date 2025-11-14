@@ -3,5 +3,5 @@
 | register-service   |  8082  |                                                    |
 | login-service      |  8083  |                                                    |
 | song-service       |  8084  |                                                    |
-|                    |        |                                                    |
+| playlist-service   |  8085  |                                                    |
 |
