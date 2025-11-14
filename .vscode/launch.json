@@ -31,6 +31,16 @@
             "projectName": "register-service",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-LoginApiApplication<login-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.github.login_service.LoginApiApplication",
+            "projectName": "login-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
