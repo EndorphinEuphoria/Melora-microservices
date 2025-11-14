@@ -109,23 +109,23 @@ public class UserControllerTest {
 
     //Aqui probaremos si el metood para crear usuarios devuelve un codigo 201 CREATED 
     @Test
-    void createUserTest_returnsCreatedUseriscreated() throws Exception{
-        User user =  new User(1L, "test2", "test2", "test2", "test2@a.cl", "test2", "test2", null);
-        
-        when(userService.getByMail(user.getEmail())).thenReturn(null);
+void createUserTest_returnsCreatedUseriscreated() throws Exception {
+    User user = new User(1L, "test2", "test2", "test2", "test2@a.cl", "test2", "test2", null);
 
-        when(userService.saveUser(any(User.class))).thenReturn(user);
+    when(userService.getByMail(user.getEmail())).thenReturn(Optional.empty());
+    when(userService.saveUser(any(User.class))).thenReturn(user);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String Json = objectMapper.writeValueAsString(user);
+    String json = new ObjectMapper().writeValueAsString(user);
 
-        try {
-            mockMvc.perform(post("/api-v1/register").contentType(MediaType.APPLICATION_JSON).content(Json)).andExpect(status().isCreated()).
-            andExpect(content().string("Usuario creado correctamente."));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    mockMvc.perform(
+            post("/api-v1/register/add")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.mensaje").value("Usuario creado correctamente."))
+            .andExpect(jsonPath("$.usuario.email").value("test2@a.cl"));
+}
+
 
     //Aqui probaremos si el metodo para actualizar usuarios actualiza de forma correcta el email de el usuario y de ser asi lanza un codigo OK
     @Test
