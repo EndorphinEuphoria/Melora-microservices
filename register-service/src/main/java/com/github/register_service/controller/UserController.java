@@ -1,5 +1,6 @@
 package com.github.register_service.controller;
 
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.register_service.dto.UserDto;
+import com.github.register_service.model.Rol;
 import com.github.register_service.model.User;
 import com.github.register_service.service.UserService;
 
@@ -39,28 +42,41 @@ public class UserController {
     // TODO cambiar ResponseEntity<TYPE>
     private final UserService userService;
 
-    @Operation( summary = "Este endpoint permite crear usuarios.")
-    @ApiResponses(value = {
-    @ApiResponse(responseCode = "201", description = "CREATED: indica que el usuario ha sido creado con éxito.", content = @Content(schema = @Schema(implementation = User.class))),
-    @ApiResponse(responseCode = "400", description = "BAD REQUEST: indica que el usuario ya existe.", content = @Content(schema = @Schema(implementation = User.class)))})
    @PostMapping("/add")
-public ResponseEntity<?> addUser(@RequestBody User user) {
+@Operation(summary = "Este endpoint permite crear usuarios.")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "CREATED: indica que el usuario ha sido creado con éxito.",
+                content = @Content(schema = @Schema(implementation = User.class))),
+        @ApiResponse(responseCode = "400", description = "BAD REQUEST: indica que el correo ya existe.",
+                content = @Content(schema = @Schema(implementation = String.class)))
+})
+public ResponseEntity<?> addUser(@RequestBody UserDto dto) {
     try {
-        if (userService.getByMail(user.getEmail()).isPresent()) {
+        if (userService.getByMail(dto.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Correo en uso, por favor utilice otro.");
         }
 
-        User newUser = userService.saveUser(user);
+        User user = new User();
+        user.setNickname(dto.getNickname());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
 
-        // Crear cuerpo de respuesta
+        Rol rol = new Rol();
+        rol.setIdRol(dto.getRolId() != null ? dto.getRolId() : 1L);
+        user.setRol(rol);
+
+        User newUser = userService.saveUser(user, dto.getProfilePhotoBase64());
+
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("mensaje", "Usuario creado correctamente.");
         body.put("usuario", newUser);
 
         EntityModel<Map<String, Object>> resource = EntityModel.of(body);
+
         resource.add(linkTo(methodOn(UserController.class)
                 .existsById(newUser.getIdUser())).withSelfRel());
+
         resource.add(linkTo(methodOn(UserController.class)
                 .getAllUsers()).withRel("todos"));
 
@@ -74,6 +90,8 @@ public ResponseEntity<?> addUser(@RequestBody User user) {
                 .body("Error inesperado: " + e.getMessage());
     }
 }
+
+
 
     @Operation( summary = "Este endpoint permite comprobar la existencia de un usuario por email.")
     @ApiResponses(value = {
@@ -110,7 +128,8 @@ public ResponseEntity<?> addUser(@RequestBody User user) {
             userModel.add(linkTo(methodOn(UserController.class).existsById(idUser)).withSelfRel());
             userModel.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("todos"));
             userModel.add(linkTo(methodOn(UserController.class).deleteById(idUser)).withRel("eliminar"));
-            userModel.add(linkTo(methodOn(UserController.class).updateUser(idUser, user1)).withRel("actualizar"));
+            userModel.add(linkTo(methodOn(UserController.class)
+        .updateUser(idUser, new UserDto())).withRel("actualizar"));
 
             return ResponseEntity.status(HttpStatus.OK).body(userModel);
         } catch (RuntimeException e) {
@@ -140,29 +159,55 @@ public ResponseEntity<?> deleteById(@PathVariable Long idUser) {
     }
 }
 
-    @Operation( summary = "Este endpoint permite actualizar información de un usuario a través de su ID.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "OK: indica que la información del usuario se actualizó correctamente", content = @Content(schema = @Schema(implementation = User.class))),
-        @ApiResponse(responseCode = "404", description = "NOT FOUND: indica que el usuario no ha sido encontrado.", content = @Content(schema = @Schema(implementation = String.class))),
-        @ApiResponse(responseCode = "409", description = "CONFLICT: indica que hubo un conflicto, el email no puede estar duplicado", content = @Content(schema = @Schema(implementation = String.class)))
-    })
-    @PatchMapping("/update/{idUser}")
-    public ResponseEntity<?> updateUser(@PathVariable Long idUser, @RequestBody User user) {
-        try {
-            user.setIdUser(idUser);
-            User updatedUser = userService.updateUserById(user);
+   @Operation( summary = "Este endpoint permite actualizar información de un usuario a través de su ID.")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "OK: indica que la información del usuario se actualizó correctamente", content = @Content(schema = @Schema(implementation = User.class))),
+    @ApiResponse(responseCode = "404", description = "NOT FOUND: indica que el usuario no ha sido encontrado.", content = @Content(schema = @Schema(implementation = String.class))),
+    @ApiResponse(responseCode = "409", description = "CONFLICT: indica que hubo un conflicto, el email no puede estar duplicado", content = @Content(schema = @Schema(implementation = String.class)))
+})
+@PatchMapping("/update/{idUser}")
+public ResponseEntity<?> updateUser(
+        @PathVariable Long idUser,
+        @RequestBody UserDto dto) {
 
-            EntityModel<User> userModel = EntityModel.of(updatedUser);
-            userModel.add(linkTo(methodOn(UserController.class).updateUser(idUser, user)).withSelfRel());
-            userModel.add(linkTo(methodOn(UserController.class).existsById(idUser)).withRel("ver-usuario"));
-            userModel.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("todos"));
-            return ResponseEntity.status(HttpStatus.OK).body(userModel);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("El email ingresado ya está en uso");
+    try {
+        // Crear objeto User parcial
+        User user = new User();
+        user.setIdUser(idUser);
+        user.setNickname(dto.getNickname());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+
+        // Rol
+        if (dto.getRolId() != null) {
+            Rol r = new Rol();
+            r.setIdRol(dto.getRolId());
+            user.setRol(r);
         }
+
+        // Foto Base64 (puede ser null)
+        String base64 = dto.getProfilePhotoBase64();
+
+        // Actualizar usuario
+        User updatedUser = userService.updateUserById(user, base64);
+
+        // Respuesta HATEOAS
+        EntityModel<User> userModel = EntityModel.of(updatedUser);
+        userModel.add(linkTo(methodOn(UserController.class).updateUser(idUser, dto)).withSelfRel());
+        userModel.add(linkTo(methodOn(UserController.class).existsById(idUser)).withRel("ver-usuario"));
+        userModel.add(linkTo(methodOn(UserController.class).getAllUsers()).withRel("todos"));
+
+        return ResponseEntity.status(HttpStatus.OK).body(userModel);
+
+    } catch (EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+
+    } catch (DataIntegrityViolationException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("El email ingresado ya está en uso");
     }
+}
+
 
     @Operation( summary = "Este endpoint permite obtener una lista con todos los usuarios registrados.")
     @ApiResponses(value = {
@@ -178,7 +223,7 @@ public ResponseEntity<?> deleteById(@PathVariable Long idUser) {
                 EntityModel<User> model = EntityModel.of(user);
                 model.add(linkTo(methodOn(UserController.class).existsById(user.getIdUser())).withSelfRel());
                 model.add(linkTo(methodOn(UserController.class).deleteById(user.getIdUser())).withRel("eliminar"));
-                model.add(linkTo(methodOn(UserController.class).updateUser(user.getIdUser(), user)).withRel("actualizar"));
+                model.add(linkTo(methodOn(UserController.class).updateUser(user.getIdUser(), new UserDto())).withRel("actualizar"));
                 return model;
             }).toList();
 

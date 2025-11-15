@@ -18,4 +18,12 @@ public class UserDto {
 
     @Schema(description = "ID del rol asociado al usuario", example = "1")
     private Long rolId;
+
+    @Schema(description = "Nickname o mote asociado al usuario",example = "Nick")
+    private String nickname;
+
+    @Schema(description = "Foto de perfil asociada al usuario")
+    private String profilePhotoBase64;
+
+
 }

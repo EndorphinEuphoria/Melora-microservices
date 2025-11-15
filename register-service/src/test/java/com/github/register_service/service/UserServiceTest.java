@@ -38,25 +38,23 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    //Aqui verificamos que al momento de encontrar todos los usuarios el metodo alojado en el servicio se comporte de igual manera como lo haria el repositorio
     @Test 
     void findAll_returnsListFromRepository(){
         List<User> users = Arrays.asList(
-            new User(1L, "test", "test", "test", "test@a.cl", "test", "test", null),
-            new User(2L, "test2", "test2", "test2", "test2@a.cl", "test2",  "test2", null));
+            new User(1L, "test", "test@a.cl", "test", null, null),
+            new User(2L, "test2", "test2@a.cl", "test2", null, null)
+        );
 
         when(userRepository.findAll()).thenReturn(users);
 
         List<User> result = userService.findAllUsers();
 
         assertThat(result).isEqualTo(users);
-
     }
 
-    //Aqui verificamos que al momento de encontrar todos los usuarios el metodo alojado en el servicio se comporte de igual manera como lo haria el repositorio
     @Test
     void findById_returnsUserByID(){
-        User user = new User(1L, "test1", "test1", "test1", "test1@a.cl", "test1", "test1", null);
+        User user = new User(1L, "test1", "test1@a.cl", "test1", null, null);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
@@ -65,10 +63,9 @@ public class UserServiceTest {
         assertThat(result).isEqualTo(user);
     }
 
-    //Aqui verificamos que al momento de encontrar  los usuarios por el email el metodo alojado en el servicio se comporte de igual manera como lo haria el repositorio
     @Test
     void findByEmail_returnsUserByEmail(){
-        User user = new User(1L, "test1", "test1", "test1", "test1@a.cl", "test1", "test1", null);
+        User user = new User(1L, "test1", "test1@a.cl", "test1", null, null);
 
         when(userRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(user));
 
@@ -78,13 +75,11 @@ public class UserServiceTest {
         assertThat(result.get()).isEqualTo(user);
     }
 
-    
-    //Aqui verificamos que al momento de encontrar  los usuarios por el email el metodo alojado en el servicio se comporte de igual manera como lo haria el repositorio
     @Test
     void deleteById_itsInvoked(){
         Long idUsuario = 1L;
         
-        User user = new User(1L, "test1", "test1", "test1", "test1@a.cl", "test1", "test1", null);
+        User user = new User(1L, "test1",  "test1@a.cl", "test1", null, null);
         
         when(userRepository.findById(idUsuario)).thenReturn(Optional.of(user));
 
@@ -93,44 +88,42 @@ public class UserServiceTest {
         verify(userRepository).delete(user);
     }
 
-    //aqui verificamos que al guarde el usuario de manera correcta
     @Test
     void saveUser_savesUsers(){
-    Rol rol = new Rol(1L, "a", null);
-    
-    when(rolRepository.findById(rol.getIdRol())).thenReturn(Optional.of(rol));
+        Rol rol = new Rol(1L, "a", null);
 
-    User user = new User(1L, "test1", "test1", "test1", "test1@a.cl", "test1", "test1", rol);
+        when(rolRepository.findById(1L)).thenReturn(Optional.of(rol));
+        when(passwordEncoder.encode("test1")).thenReturn("encrypt");
 
-    when(passwordEncoder.encode("test1")).thenReturn("encrypt");
+        User inputUser = new User(null, "test",  "test@a.cl", "test1", null, rol);
 
-    User savedUser = new User(1L, "test@gmail.com", "test1", "test1", "test1@a.cl", "encrypt", "test1", null);
+        User savedUser = new User(1L, "test",  "test@a.cl", "encrypt", null, rol);
 
-    when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-    User result = userService.saveUser(user);
+        User result = userService.saveUser(inputUser, null);
 
-    verify(passwordEncoder).encode("test1");
+        verify(passwordEncoder).encode("test1");
 
-    assertThat(result.getEmail()).isEqualTo("test1@a.cl");
-    assertThat(result.getPassword()).isEqualTo("encrypt");
-}
+        assertThat(result.getEmail()).isEqualTo("test@a.cl");
+        assertThat(result.getPassword()).isEqualTo("encrypt");
+    }
 
     @Test
     public void testUpdateUserById() {
 
-    User user = new User(1L, "test1", "test1", "test1", "test1@a.cl", "test1", "test1", null);
-    when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        User user = new User(1L, "test1", "test1@a.cl", "test1", null, null);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-    User newUser = new User(1L, "test1", "test1", "test1", "test2@a.cl", "test1", "test1", null);
-    
-    when(userRepository.save(any(User.class))).thenReturn(newUser);
+        User newUser = new User(1L, "test1",  "test2@a.cl", "test1", null, null);
 
-    User result = userService.updateUserById(newUser);
-    verify(userRepository).save(any(User.class));
+        when(userRepository.save(any(User.class))).thenReturn(newUser);
 
-    assertEquals("test2@a.cl", result.getEmail());
-  
+        User result = userService.updateUserById(newUser, null);
 
-}
+        verify(userRepository).save(any(User.class));
+
+        assertEquals("test2@a.cl", result.getEmail());
+    }
+
 }

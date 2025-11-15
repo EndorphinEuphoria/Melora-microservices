@@ -3,6 +3,8 @@ package com.github.login_service.model;
 import org.springframework.hateoas.RepresentationModel;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,26 +20,14 @@ public class User extends RepresentationModel<User>{
     @Schema(description = "ID único del usuario")
     private Long idUser;
 
-    @Schema(description = "Email del usuario")
+    @Schema(description = "Nickname único del usuario", example = "LukasDS1")
+    private String nickname;
+    
+    @Schema(description = "Correo electrónico único del usuario", example = "lukas@example.com")
     private String email;
 
-    @Schema(description = "Contraseña del usuario")
+    @Schema(description = "Contraseña del usuario (encriptada en base de datos)", example = "********")
     private String password;
-
-    @Schema(description = "Nombre del usuario") 
-    private String nombre;
-
-    @Schema(description = "Apellido paterno del usuario")
-    private String apellidoPaterno;
-
-    @Schema(description = "Apellido materno del usuario")
-    private String apellidoMaterno;
-
-    @Schema(description = "Genero del usuario")
-    private String genero;
-
-    @Schema(description = "Rut del usuario")
-    private String rut;
 
     @Schema(description = "ID del rol asignado al usuario")
     private Rol rol;

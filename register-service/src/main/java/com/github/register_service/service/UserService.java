@@ -50,7 +50,7 @@ public class UserService {
         userRepository.delete(exist);
     }
 
-   public User saveUser(User user) {
+   public User saveUser(User user, String base64Photo) {
     User userToSave = new User();
 
     Rol rol;
@@ -60,14 +60,15 @@ public class UserService {
     } else {
         rol = findRol(user.getRol().getIdRol());
     }
-
-    userToSave.setName(user.getName());
-    userToSave.setLName(user.getLName());
+    
     userToSave.setNickname(user.getNickname());
     userToSave.setEmail(user.getEmail());
     userToSave.setPassword(passwordEncoder.encode(user.getPassword()));
     userToSave.setRol(rol);
-    userToSave.setProfilePhotoUrl(user.getProfilePhotoUrl());
+
+    if (base64Photo != null && !base64Photo.isBlank()) {
+        userToSave.setProfilePhotoUrl(decodeBase64(base64Photo));
+    }
 
     return userRepository.save(userToSave);
 }
@@ -77,15 +78,9 @@ public class UserService {
         .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
     }
 
-    public User updateUserById(User user) {
+    public User updateUserById(User user, String base64Photo) {
         User newUserInfo = userRepository.findById(user.getIdUser()).orElseThrow(() -> new EntityNotFoundException("Usuario inexistente."));
-        if (user.getName() != null && !user.getName().trim().isBlank()) {
-            newUserInfo.setName(user.getName());
-        }
 
-        if (user.getLName() != null && !user.getLName().trim().isBlank()) {
-            newUserInfo.setLName(user.getLName());
-        }
 
         if (user.getNickname() != null && !user.getNickname().trim().isBlank()) {
             newUserInfo.setNickname(user.getNickname());
@@ -99,17 +94,19 @@ public class UserService {
             newUserInfo.setPassword(encrypt(user.getPassword()));
         }
 
-        // TODO: CAMBIAR, NO CREO QUE FUNCIONE :(
-        if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().trim().isBlank()) {
-            newUserInfo.setProfilePhotoUrl(user.getProfilePhotoUrl());
-        }
-
         if (user.getRol() != null) {
             newUserInfo.setRol(user.getRol());
         }
+        
+         if (base64Photo != null && !base64Photo.isBlank()) {
+        newUserInfo.setProfilePhotoUrl(decodeBase64(base64Photo));
+    }
 
         return userRepository.save(newUserInfo);
     }
 
+    private byte[] decodeBase64(String Base64){
+        return java.util.Base64.getDecoder().decode(Base64);
+    }
 
 }
