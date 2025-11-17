@@ -1,6 +1,6 @@
 | Microservicio      | Puerto | Base de datos                                      |
 |--------------------|--------|----------------------------------------------------|
-| register-service   |  8082  | melora-register                                    |
-| song-service       |  8084  | melora-music                                       |
+| register-service   |  8082  | melora_auth                                         |
+| song-service       |  8084  | melora_song                                         |
 | playlist-service   |  8085  | ?                                                  |
-|                    |        |                                                    |
+|                    |        |                                                    |    

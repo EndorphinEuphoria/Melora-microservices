@@ -13,7 +13,7 @@ public class UserClientService {
     
     private final RestTemplate restTemplate;
 
-    private static final String USER_SERVICE_URL = "http://localhost:8082/api-v1/register";
+    private static final String USER_SERVICE_URL = "http://localhost:8082/api-v1/auth";
 
     public String getNicknameByUserId(Long userId) {
         try {

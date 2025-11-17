@@ -37,7 +37,7 @@ public class playListService {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String USER_SERVICE_URL = "http://localhost:8082/api-v1/register/exists/";
+    private static final String USER_SERVICE_URL = "http://localhost:8082/api-v1/auth/exists/";
 
     // Verifica si el usuario existe en el microservicio de usuarios
     public boolean userExists(Long userId) {

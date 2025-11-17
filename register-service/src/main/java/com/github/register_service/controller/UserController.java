@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
-@RequestMapping("/api-v1/register")
+@RequestMapping("/api-v1/auth")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -236,44 +236,41 @@ public ResponseEntity<?> updateUser(
     }
 
     
-    @Operation(summary = "Este endpoint permite validar usuario al iniciar sesión")
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "202",
-            description = "Usuario validado correctamente",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(type = "object")
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Email o contraseña incorrectos"
-        )
-    })
-    @PostMapping("/login")
-    public ResponseEntity<?> validateUsuario(@RequestBody User userRequest) {
-        try {
+   @PostMapping("/login")
+public ResponseEntity<?> validateUsuario(@RequestBody User userRequest) {
+    try {
 
-            boolean isValid = userService.validateLogin(
-                userRequest.getEmail(), 
-                userRequest.getPassword()
-            );
+        boolean isValid = userService.validateLogin(
+            userRequest.getEmail(), 
+            userRequest.getPassword()
+        );
 
-            if (isValid) {
-                Map<String, Object> response = new LinkedHashMap<>();
-                response.put("self", "http://localhost:8082/api-v1/login");
-                response.put("message", "Usuario ingresado con éxito: " + userRequest.getEmail());
-
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
-            }
-
-            return ResponseEntity
-                .badRequest()
-                .body("Error: Email o contraseña incorrectas");
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error al autenticar. " + e.getMessage());
+        if (!isValid) {
+            return ResponseEntity.badRequest().body("Email o contraseña incorrectas");
         }
+
+        Optional<User> userOpt = userService.getByMail(userRequest.getEmail());
+        User user = userOpt.get();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("self", "http://localhost:8082/api-v1/auth/login");
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("idUser", user.getIdUser());
+        data.put("email", user.getEmail());
+        data.put("nickname", user.getNickname());
+        data.put("rolId", user.getRol().getIdRol());
+        data.put("profilePhotoBase64",
+            user.getProfilePhotoUrl() != null
+                ? Base64.getEncoder().encodeToString(user.getProfilePhotoUrl())
+                : null);
+
+        body.put("data", data);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(body);
+
+    } catch (Exception e) {
+        throw new RuntimeException("Error al autenticar. " + e.getMessage());
     }
+}
 }
