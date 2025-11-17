@@ -146,10 +146,5 @@ public class SongController {
         }
     }
 
-    //  CONTADOR 
-    @Operation(summary = "Contar cuántas canciones existen")
-    @GetMapping("/count")
-    public ResponseEntity<Map<String, Long>> count() {
-        return ResponseEntity.ok(Map.of("count", songService.count()));
-    }
+
 }

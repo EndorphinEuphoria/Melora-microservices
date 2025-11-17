@@ -39,7 +39,7 @@ public class UploadServiceTest {
 
         UploadRequestDto dto = new UploadRequestDto();
         dto.setSongName("Song");
-        dto.setSongPath("/path");
+        dto.setSongPathBase64("/path");
         dto.setSongDuration(200);
         dto.setUserId(10L);
 

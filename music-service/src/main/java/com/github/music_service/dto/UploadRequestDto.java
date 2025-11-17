@@ -11,7 +11,7 @@ public class UploadRequestDto {
 
     @Schema(description = "ID del usuario que sube la canción")
     private Long userId;
-
+    
     @Schema(description = "Nombre de la canción")
     private String songName;
 
@@ -19,7 +19,7 @@ public class UploadRequestDto {
     private String songDescription;
 
     @Schema(description = "Ruta del archivo de audio")
-    private String songPath;
+    private String songPathBase64;
 
     @Schema(description = "Portada de la canción")
     private String coverArt;

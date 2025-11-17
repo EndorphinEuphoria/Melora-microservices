@@ -38,7 +38,7 @@ public class UploadControllerTest {
     void uploadSong_thenReturnCreated() throws Exception {
         UploadRequestDto dto = new UploadRequestDto();
         dto.setSongName("Song");
-        dto.setSongPath("path.mp3");
+        dto.setSongPathBase64("path.mp3");
         dto.setSongDuration(120);
         dto.setUserId(1L);
 
@@ -68,7 +68,7 @@ public class UploadControllerTest {
     void uploadSong_whenError_thenReturnBadRequest() throws Exception {
         UploadRequestDto dto = new UploadRequestDto();
         dto.setSongName("");
-        dto.setSongPath("");
+        dto.setSongPathBase64("");
         dto.setSongDuration(-1);
         dto.setUserId(1L);
 

@@ -33,13 +33,13 @@ public class Song {
     @Schema(description = "Descripción de la canción", example = "Versión acústica")
     private String songDescription;
 
-    @Column(nullable = false)
-    @Schema(description = "Ruta del archivo de audio", example = "/music/song123.mp3")
-    private String songPath;
+    @Column(nullable = false, columnDefinition = "LONGBLOB")
+    @Schema(description = "Archivo de audio codificado en Base64 (byte[])")
+    private byte [] songPathBase64;
 
-    @Column
-    @Schema(description = "Imagen de portada de la canción", example = "/images/cover123.png")
-    private String coverArt;
+    @Column(nullable = false,columnDefinition = "LONGBLOB")
+    @Schema(description = "Imagen de portada codificada en Base64 (byte[])")
+    private byte [] coverArt;
 
     @Column(nullable = false)
     @Schema(description = "Duración de la canción en segundos", example = "240")

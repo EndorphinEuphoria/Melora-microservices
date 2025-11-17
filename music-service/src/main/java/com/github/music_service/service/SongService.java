@@ -18,20 +18,26 @@ public class SongService {
     private final UserClientService userClientService; 
 
     public Long create(Song song) {
-        if (song.getSongName() == null || song.getSongName().isBlank())
-            throw new IllegalArgumentException("The Song name cannot be empty");
-        if (song.getSongPath() == null || song.getSongPath().isBlank())
-            throw new IllegalArgumentException("Song path is required");
-        if (song.getSongDuration() == null || song.getSongDuration() <= 0)
-            throw new IllegalArgumentException("Song duration must be > 0");
 
-        if (song.getCreationDate() == null) {
-            song.setCreationDate(System.currentTimeMillis());
-        }
+    if (song.getSongName() == null || song.getSongName().isBlank())
+        throw new IllegalArgumentException("The Song name cannot be empty");
 
-        Song saved = songRepository.save(song);
-        return saved.getIdSong();
-    }
+    if (song.getSongPathBase64() == null)
+        throw new IllegalArgumentException("Song audio is required");
+
+    if (song.getSongDuration() == null || song.getSongDuration() <= 0)
+        throw new IllegalArgumentException("Song duration must be > 0");
+
+    if (song.getCoverArt() == null)
+        throw new IllegalArgumentException("Cover art is required");
+
+    if (song.getCreationDate() == null)
+        song.setCreationDate(System.currentTimeMillis());
+
+    Song saved = songRepository.save(song);
+    return saved.getIdSong();
+}
+
 
 
     public List<SongDetailedDto> getAllDetailed() {
@@ -58,7 +64,6 @@ public class SongService {
         return dto;
     }
 
-    public long count() { return songRepository.count(); }
 
     public void updatePartial(Long songId, String newName, String newDescription) {
         Song s = songRepository.findById(songId)
@@ -74,6 +79,11 @@ public class SongService {
 
     public boolean existsById(Long songId) {
     return songRepository.existsById(songId);
-}
+    }
+
+   
+    private byte[] decodeBase64(String Base64){
+        return java.util.Base64.getDecoder().decode(Base64);
+    }
 
 }

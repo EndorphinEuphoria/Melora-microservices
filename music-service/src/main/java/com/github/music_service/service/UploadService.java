@@ -9,8 +9,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -21,13 +24,17 @@ public class UploadService {
     private final UserClientService userClientService;
 
     public Map<String, Long> uploadSong(UploadRequestDto dto) {
-        // Validaciones básicas
+
+        // VALIDACIONES
         if (dto.getSongName() == null || dto.getSongName().isBlank())
             throw new IllegalArgumentException("Song name cannot be empty");
-        if (dto.getSongPath() == null || dto.getSongPath().isBlank())
+
+        if (dto.getSongPathBase64() == null || dto.getSongPathBase64().isBlank())
             throw new IllegalArgumentException("Song path cannot be null");
+
         if (dto.getSongDuration() == null || dto.getSongDuration() <= 0)
             throw new IllegalArgumentException("Invalid song duration");
+
         if (dto.getUserId() == null)
             throw new IllegalArgumentException("User ID cannot be null");
 
@@ -37,20 +44,22 @@ public class UploadService {
             throw new IllegalArgumentException("User not found or unavailable in user-service");
         }
 
-        // Crear la canción
+        // CREAR SONG
         Song song = new Song();
         song.setSongName(dto.getSongName());
         song.setSongDescription(dto.getSongDescription());
-        song.setSongPath(dto.getSongPath());
-        song.setCoverArt(dto.getCoverArt());
         song.setSongDuration(dto.getSongDuration());
-        song.setCreationDate(dto.getCreationDate() != null
-                ? dto.getCreationDate()
-                : System.currentTimeMillis());
+        song.setCreationDate(dto.getCreationDate() != null ? dto.getCreationDate() : System.currentTimeMillis());
+
+        song.setSongPathBase64(Base64.getDecoder().decode(dto.getSongPathBase64()));
+
+        if (dto.getCoverArt() != null && !dto.getCoverArt().isBlank()) {
+            song.setCoverArt(Base64.getDecoder().decode(dto.getCoverArt()));
+        }
 
         Song savedSong = songRepository.save(song);
 
-        // Crear la subida (upload)
+        // CREAR UPLOAD
         Upload upload = new Upload();
         upload.setUserId(dto.getUserId());
         upload.setSong(savedSong);
@@ -59,11 +68,12 @@ public class UploadService {
 
         Upload savedUpload = uploadRepository.save(upload);
 
-        // Respuesta
         Map<String, Long> response = new HashMap<>();
         response.put("songId", savedSong.getIdSong());
         response.put("uploadId", savedUpload.getUploadId());
+
         return response;
     }
+
 }
 

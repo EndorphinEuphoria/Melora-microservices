@@ -38,7 +38,7 @@ public class User extends RepresentationModel<User> {
 
     @Lob
     @Column(nullable = true, length = 255)
-    @Schema(description = "URL de la foto de perfil del usuario", example = "https://cdn.melora.com/profiles/lukas.png")
+    @Schema(description = "Foto de perfil en bytes (decodificada desde base64)")
     private byte[] profilePhotoUrl;
 
     @ManyToOne(fetch = FetchType.EAGER)

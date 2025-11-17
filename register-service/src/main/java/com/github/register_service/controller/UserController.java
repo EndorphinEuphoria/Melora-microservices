@@ -234,4 +234,46 @@ public ResponseEntity<?> updateUser(
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No existen usuarios registrados.");
         }
     }
+
+    
+    @Operation(summary = "Este endpoint permite validar usuario al iniciar sesión")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "202",
+            description = "Usuario validado correctamente",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(type = "object")
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Email o contraseña incorrectos"
+        )
+    })
+    @PostMapping("/login")
+    public ResponseEntity<?> validateUsuario(@RequestBody User userRequest) {
+        try {
+
+            boolean isValid = userService.validateLogin(
+                userRequest.getEmail(), 
+                userRequest.getPassword()
+            );
+
+            if (isValid) {
+                Map<String, Object> response = new LinkedHashMap<>();
+                response.put("self", "http://localhost:8082/api-v1/login");
+                response.put("message", "Usuario ingresado con éxito: " + userRequest.getEmail());
+
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+            }
+
+            return ResponseEntity
+                .badRequest()
+                .body("Error: Email o contraseña incorrectas");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al autenticar. " + e.getMessage());
+        }
+    }
 }

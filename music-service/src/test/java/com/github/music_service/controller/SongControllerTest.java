@@ -38,7 +38,7 @@ public class SongControllerTest {
     void createSong_thenReturnCreated() throws Exception {
         Song song = new Song();
         song.setSongName("Song");
-        song.setSongPath("path.mp3");
+        song.setSongPathBase64("path.mp3".getBytes());
         song.setSongDuration(100);
 
         when(songService.create(song)).thenReturn(10L);
@@ -161,19 +161,4 @@ public class SongControllerTest {
             e.printStackTrace();
         }
     }
-
-    // COUNT
-    @Test
-    void countSongs_thenReturnCount() {
-        when(songService.count()).thenReturn(50L);
-
-        try {
-            mockMvc.perform(get("/api-v1/songs/count"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.count").value(50L));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }

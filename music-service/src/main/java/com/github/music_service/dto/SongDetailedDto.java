@@ -15,13 +15,13 @@ public class SongDetailedDto {
     private String songName;
 
     @Schema(description = "Portada de la canción")
-    private String coverArt;
+    private byte [] coverArt;
 
     @Schema(description = "Descripción de la canción")
     private String songDescription;
 
     @Schema(description = "Ruta del archivo de audio")
-    private String songPath;
+    private byte [] songPathBase64;
 
     @Schema(description = "Duración de la canción en segundos")
     private Integer durationSong;

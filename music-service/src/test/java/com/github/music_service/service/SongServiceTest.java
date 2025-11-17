@@ -34,7 +34,7 @@ public class SongServiceTest {
     void createSong_savesAndReturnsId() {
         Song song = new Song();
         song.setSongName("Test Song");
-        song.setSongPath("/test.mp3");
+        song.setSongPathBase64("/test.mp3".getBytes());
         song.setSongDuration(100);
         
         Song savedSong = new Song();

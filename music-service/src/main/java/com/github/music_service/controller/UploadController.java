@@ -35,7 +35,6 @@ public class UploadController {
         try {
             Map<String, Long> response = uploadService.uploadSong(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "No se pudo subir la canción: " + e.getMessage()));

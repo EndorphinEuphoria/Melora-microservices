@@ -19,15 +19,29 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
-    
     private final UserRepository userRepository;
     private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private String encrypt(String password) {
-        return passwordEncoder.encode(password);
+
+    public boolean validateLogin(String email, String rawPassword) {
+
+    Optional<User> usuarioOpt = userRepository.findByEmail(email);
+
+    if (usuarioOpt.isEmpty()) {
+        return false; 
     }
 
+    User usuario = usuarioOpt.get();
+
+    return passwordEncoder.matches(rawPassword, usuario.getPassword());
+}
+
+
+    private String encrypt(String password) {
+        return passwordEncoder.encode(password);
+        
+    }
     public Rol findRol(Long idRol) {
         return rolRepository.findById(idRol).orElseThrow(() -> new EntityNotFoundException("Rol no encontrado."));
     }
