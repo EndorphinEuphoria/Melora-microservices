@@ -24,29 +24,6 @@ public class SongController {
 
     private final SongService songService;
 
-    //  CREAR CANCIÓN 
-    @Operation(
-            summary = "Crear una nueva canción",
-            description = "Crea una canción nueva en la base de datos. Este endpoint es utilizado por el cliente-orquesta."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Canción creada exitosamente",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Song.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos enviados por el cliente"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody Song song) {
-        try {
-            Long id = songService.create(song);
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("songId", id));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "No se pudo crear la canción: " + e.getMessage()));
-        }
-    }
-
     //  LISTAR DETALLADAS 
     @Operation(
             summary = "Obtener todas las canciones detalladas",
@@ -55,7 +32,7 @@ public class SongController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
     })
-    @GetMapping
+    @GetMapping("/getAll")
     public ResponseEntity<List<SongDetailedDto>> all() {
         return ResponseEntity.ok(songService.getAllDetailed());
     }

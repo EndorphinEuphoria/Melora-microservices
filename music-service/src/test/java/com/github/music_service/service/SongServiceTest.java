@@ -29,23 +29,7 @@ public class SongServiceTest {
     @InjectMocks
     private SongService songService;
 
-    // CREATE SONG
-    @Test
-    void createSong_savesAndReturnsId() {
-        Song song = new Song();
-        song.setSongName("Test Song");
-        song.setSongPathBase64("/test.mp3".getBytes());
-        song.setSongDuration(100);
-        
-        Song savedSong = new Song();
-        savedSong.setIdSong(1L);
-
-        when(songRepository.save(any(Song.class))).thenReturn(savedSong);
-
-        Long result = songService.create(song);
-
-        assertThat(result).isEqualTo(1L);
-    }
+    
 
     // GET ALL DETAILED
     @Test

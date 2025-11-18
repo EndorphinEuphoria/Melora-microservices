@@ -33,29 +33,6 @@ public class SongControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // CREATE
-    @Test
-    void createSong_thenReturnCreated() throws Exception {
-        Song song = new Song();
-        song.setSongName("Song");
-        song.setSongPathBase64("path.mp3".getBytes());
-        song.setSongDuration(100);
-
-        when(songService.create(song)).thenReturn(10L);
-
-        String json = objectMapper.writeValueAsString(song);
-
-        try {
-            mockMvc.perform(post("/api-v1/songs")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(json))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.songId").value(10L));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     // GET ALL
     @Test
     void listAllSongs_thenReturnOk() {

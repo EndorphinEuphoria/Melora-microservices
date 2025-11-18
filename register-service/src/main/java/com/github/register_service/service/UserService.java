@@ -31,8 +31,7 @@ public class UserService {
     if (usuarioOpt.isEmpty()) {
         return false; 
     }
-
-    User usuario = usuarioOpt.get();
+   User usuario = usuarioOpt.get();
 
     return passwordEncoder.matches(rawPassword, usuario.getPassword());
 }

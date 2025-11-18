@@ -25,7 +25,7 @@ public class UserClientService {
             if (user != null && user.getNickname() != null) {
                 return user.getNickname();
             }
-        } catch (Exception e) {
+        } catch (Exception e) { 
             System.err.println(" Error al consultar nickname de usuario ID " 
                 + userId + ": " + e.getMessage());
         }
