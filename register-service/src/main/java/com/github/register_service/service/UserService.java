@@ -84,7 +84,9 @@ public class UserService {
     }
 
     return userRepository.save(userToSave);
-}
+    
+    }
+
 
     public User findUserById(Long idUser) {
         return userRepository.findById(idUser)
@@ -120,6 +122,11 @@ public class UserService {
 
     private byte[] decodeBase64(String Base64){
         return java.util.Base64.getDecoder().decode(Base64);
+    }
+
+    public List<User> searchByNickname(String nickname) {
+
+        return userRepository.searchByNickname(nickname);
     }
 
 }

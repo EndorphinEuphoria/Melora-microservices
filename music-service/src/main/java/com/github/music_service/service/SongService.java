@@ -2,10 +2,11 @@ package com.github.music_service.service;
 
 import com.github.music_service.dto.SongDetailedDto;
 import com.github.music_service.model.Song;
+import com.github.music_service.model.Upload;
 import com.github.music_service.repository.SongRepository;
 import com.github.music_service.repository.UploadRepository;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -86,6 +87,38 @@ public class SongService {
 
     songRepository.save(s);
 }
+
+public void banSong(Long songId, String reason) {
+
+    if (reason == null || reason.isBlank()) {
+        throw new IllegalArgumentException("Ban reason cannot be empty");
+    }
+
+    // Buscar el upload asociado a la canción
+    List<Upload> uploads = uploadRepository.findBySongId(songId);
+
+    if (uploads.isEmpty()) {
+        throw new NoSuchElementException("Upload not found for song: " + songId);
+    }
+
+    Upload upload = uploads.get(0);
+
+    // Actualizar el estado del upload
+    upload.setStateId(2L);
+    upload.setBanReason(reason);
+    upload.setBanDate(System.currentTimeMillis());
+
+    // *** ROMPER LA RELACIÓN PARA EVITAR TRANSIENT ERROR ***
+    Song song = upload.getSong();
+    upload.setSong(null);
+
+    // Guardar upload SIN relación a Song
+    uploadRepository.save(upload);
+
+    // Finalmente borrar song
+    songRepository.delete(song);
+}
+
 
   
 

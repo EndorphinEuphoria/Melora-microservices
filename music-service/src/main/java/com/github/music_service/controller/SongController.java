@@ -1,6 +1,7 @@
 package com.github.music_service.controller;
 
 import com.github.music_service.dto.SongDetailedDto;
+import com.github.music_service.dto.banRequestDto;
 import com.github.music_service.model.Song;
 import com.github.music_service.service.SongService;
 
@@ -122,6 +123,21 @@ public class SongController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+@PostMapping("/{songId}/ban")
+public ResponseEntity<?> banSong(
+        @PathVariable Long songId,
+        @RequestBody banRequestDto dto
+) {
+    try {
+        songService.banSong(songId, dto.getReason());
+        return ResponseEntity.ok(Map.of("message", "Song banned successfully"));
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
+    }
+}
+
 
 
 }
