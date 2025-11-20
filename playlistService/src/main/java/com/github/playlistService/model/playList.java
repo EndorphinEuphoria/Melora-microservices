@@ -5,12 +5,16 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "playlists")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Modelo que representa una playlist creada por un usuario")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class playList {
 
     @Id

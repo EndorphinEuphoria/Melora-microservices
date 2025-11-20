@@ -10,7 +10,6 @@ import com.github.register_service.repository.RolRepository;
 import com.github.register_service.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -35,6 +34,11 @@ public class LoadDataBase {
                 ADM.setPassword(encoded);
                 userRepository.save(ADM);
 
+
+                User USR = new User(null,"TestUser","test@gmail.com","TestUser12#",null,Usuario);
+                String encoded2 = passwordEncoder.encode(USR.getPassword());
+                USR.setPassword(encoded2);
+                userRepository.save(USR);
             }else{
                 System.out.println("Datos ya existen. No se cargaron.");
             }

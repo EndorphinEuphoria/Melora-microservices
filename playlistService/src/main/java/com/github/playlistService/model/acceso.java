@@ -1,15 +1,20 @@
 package com.github.playlistService.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "acceso")
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "Modelo que representa el nivel de acceso de una playlist")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class acceso {
 
     @Id
