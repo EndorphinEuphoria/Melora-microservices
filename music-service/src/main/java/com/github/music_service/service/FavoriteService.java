@@ -54,12 +54,14 @@ public class FavoriteService {
                 .map(Favorite::getSongId)
                 .toList();
     }
+    
 
-    // Obtener canciones completas (SongDetailedDto)
     public List<SongDetailedDto> getFavoriteSongs(Long userId) {
-        return getFavoriteSongIds(userId)
-                .stream()
-                .map(songService::getDetailedById)
-                .toList();
-    }
+    return getFavoriteSongIds(userId)
+        .stream()
+        .map(songService::getLightById) // este NO trae audio
+        .toList();
+}
+
+
 }

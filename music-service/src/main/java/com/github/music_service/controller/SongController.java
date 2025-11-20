@@ -2,19 +2,15 @@ package com.github.music_service.controller;
 
 import com.github.music_service.dto.SongDetailedDto;
 import com.github.music_service.dto.banRequestDto;
-import com.github.music_service.model.Song;
 import com.github.music_service.service.SongService;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
@@ -25,44 +21,40 @@ public class SongController {
 
     private final SongService songService;
 
-    //  LISTAR DETALLADAS 
+    // -------------------------
+    // LISTAR TODAS (LIVIANO)
+    // -------------------------
     @Operation(
-            summary = "Obtener todas las canciones detalladas",
-            description = "Devuelve información completa de todas las canciones."
+            summary = "Obtener todas las canciones detalladas (sin audio ni portadas pesadas)",
+            description = "Ideal para listados rápidos en la app."
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
-    })
     @GetMapping("/getAll")
     public ResponseEntity<List<SongDetailedDto>> all() {
         return ResponseEntity.ok(songService.getAllDetailed());
     }
 
-    // EXISTE
-    @Operation(
-            summary = "Comprobar si una canción existe por su ID",
-            description = "Devuelve true o false dependiendo de si la canción está registrada."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Resultado entregado correctamente")
-    })
+    // -------------------------
+    // VALIDAR EXISTENCIA
+    // -------------------------
+    @Operation(summary = "Comprobar si una canción existe por su ID")
     @GetMapping("/exists/{songId}")
     public ResponseEntity<Boolean> exists(@PathVariable Long songId) {
         return ResponseEntity.ok(songService.existsById(songId));
     }
 
-    //  BUSCAR POR NOMBRE 
-    @Operation(
-            summary = "Buscar canciones por nombre",
-            description = "Filtra canciones que contienen el texto enviado."
-    )
+    // -------------------------
+    // BÚSQUEDA POR NOMBRE
+    // -------------------------
+    @Operation(summary = "Buscar canciones por nombre")
     @GetMapping("/search")
     public ResponseEntity<List<SongDetailedDto>> search(@RequestParam(defaultValue = "") String q) {
         return ResponseEntity.ok(songService.searchByName(q));
     }
 
-    //  OBTENER POR ID 
-    @Operation(summary = "Obtener canción detallada por ID")
+    // -------------------------
+    // DETALLE COMPLETO (CON AUDIO)
+    // -------------------------
+    @Operation(summary = "Obtener canción detallada por ID (incluye audio y portada)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Canción encontrada"),
             @ApiResponse(responseCode = "404", description = "Canción no encontrada")
@@ -71,28 +63,20 @@ public class SongController {
     public ResponseEntity<?> byId(@PathVariable Long songId) {
         try {
             return ResponseEntity.ok(songService.getDetailedById(songId));
-        } catch (RuntimeException e) {
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Canción no encontrada: " + songId));
+                    .body(Map.of("error", "Canción no encontrada con ID " + songId));
         }
     }
 
-    //  LISTAR POR ARTISTA 
     @Operation(summary = "Listar canciones por ID de artista")
     @GetMapping("/artist/{artistId}")
-    public ResponseEntity<?> byArtist(@PathVariable Long artistId) {
+    public ResponseEntity<List<SongDetailedDto>> byArtist(@PathVariable Long artistId) {
         return ResponseEntity.ok(songService.getByArtist(artistId));
     }
 
-    //  PATCH 
-    @Operation(
-            summary = "Actualizar nombre o descripción de una canción",
-            description = "Permite modificar parcialmente campos específicos."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Canción actualizada correctamente"),
-            @ApiResponse(responseCode = "404", description = "Canción no encontrada")
-    })
+  
+    @Operation(summary = "Actualizar nombre o descripción de una canción")
     @PatchMapping("/{songId}")
     public ResponseEntity<?> patch(
             @PathVariable Long songId,
@@ -100,14 +84,16 @@ public class SongController {
     ) {
         try {
             songService.updatePartial(songId, body.get("songName"), body.get("songDescription"));
-            return ResponseEntity.noContent().build();  // 204 OK
+            return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
         }
     }
 
-    //  ELIMINAR 
+    // -------------------------
+    // ELIMINAR CANCIÓN
+    // -------------------------
     @Operation(summary = "Eliminar una canción por ID")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Canción eliminada correctamente"),
@@ -124,20 +110,20 @@ public class SongController {
         }
     }
 
-@PostMapping("/{songId}/ban")
-public ResponseEntity<?> banSong(
-        @PathVariable Long songId,
-        @RequestBody banRequestDto dto
-) {
-    try {
-        songService.banSong(songId, dto.getReason());
-        return ResponseEntity.ok(Map.of("message", "Song banned successfully"));
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("error", e.getMessage()));
+    // -------------------------
+    // BANEAR CANCIÓN
+    // -------------------------
+    @PostMapping("/{songId}/ban")
+    public ResponseEntity<?> banSong(
+            @PathVariable Long songId,
+            @RequestBody banRequestDto dto
+    ) {
+        try {
+            songService.banSong(songId, dto.getReason());
+            return ResponseEntity.ok(Map.of("message", "Song banned successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
-}
-
-
-
 }
