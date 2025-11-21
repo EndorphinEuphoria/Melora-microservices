@@ -52,6 +52,9 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = String.class)))
 })
 public ResponseEntity<?> addUser(@RequestBody UserDto dto) {
+    System.out.println("ROL RECIBIDO DESDE ANDROID = " + dto.getRolId());
+    System.out.println("DTO COMPLETO = " + dto);
+
     try {
         if (userService.getByMail(dto.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -64,7 +67,7 @@ public ResponseEntity<?> addUser(@RequestBody UserDto dto) {
         user.setPassword(dto.getPassword());
 
         Rol rol = new Rol();
-        rol.setIdRol(dto.getRolId() != null ? dto.getRolId() : 1L);
+        rol.setIdRol(dto.getRolId() != null ? dto.getRolId() : 2L);
         user.setRol(rol);
 
         User newUser = userService.saveUser(user, dto.getProfilePhotoBase64());

@@ -23,14 +23,14 @@ public class playListSongsServices {
     @Autowired
     private RestTemplate restTemplate;
 
-    // ✔ ENDPOINT CORRECTO QUE DEVUELVE LA CANCIÓN COMPLETA
+    //  ENDPOINT CORRECTO QUE DEVUELVE LA CANCIÓN COMPLETA
     private static final String SONG_SERVICE_URL = "http://localhost:8084/api-v1/songs/";
 
-    // ✔ ENDPOINT QUE VERIFICA EXISTENCIA (BOOLEANO)
+    //  ENDPOINT QUE VERIFICA EXISTENCIA (BOOLEANO)
     private static final String SONG_EXISTS_URL = "http://localhost:8084/api-v1/songs/exists/";
 
     // --------------------------------------------------------------------
-    // ✔ VERIFICAR SI LA CANCIÓN EXISTE (BOOLEANO)
+    //  VERIFICAR SI LA CANCIÓN EXISTE (BOOLEANO)
     // --------------------------------------------------------------------
     public boolean songExists(Long songId) {
         try {
@@ -42,7 +42,7 @@ public class playListSongsServices {
     }
 
     // --------------------------------------------------------------------
-    // ✔ AGREGAR CANCIÓN A PLAYLIST
+    //  AGREGAR CANCIÓN A PLAYLIST
     // --------------------------------------------------------------------
     public playListSongs addSongToPlaylist(playList playlist, Long songId) {
         if (!songExists(songId)) {
@@ -57,7 +57,7 @@ public class playListSongsServices {
     }
 
     // --------------------------------------------------------------------
-    // ⭐ OBTENER CANCIONES DE UNA PLAYLIST (CORREGIDO)
+    //  OBTENER CANCIONES DE UNA PLAYLIST (CORREGIDO)
     // --------------------------------------------------------------------
     public List<SongDto> getSongsFromPlaylist(Long playlistId) {
 
@@ -66,10 +66,15 @@ public class playListSongsServices {
 
         return relations.stream()
                 .map(r -> {
-                    // ✔ LLAMADA CORRECTA: devuelve SongDetailedDto como JSON → SongDto
+                    //  LLAMADA CORRECTA: devuelve SongDetailedDto como JSON → SongDto
                     String url = SONG_SERVICE_URL + r.getSongId();
                     return restTemplate.getForObject(url, SongDto.class);
                 })
                 .toList();
+    }
+
+        
+    public void deleteBySong(Long songId) {
+    playListSongsRepository.deleteBySongId(songId);
     }
 }

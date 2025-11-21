@@ -126,4 +126,14 @@ public class SongController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+     @Operation(summary = "Eliminar todas las canciones de un usuario (artistId)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Canciones eliminadas (o no había ninguna)"),
+    })
+    @DeleteMapping("/by-user/{userId}")
+    public ResponseEntity<?> deleteByUser(@PathVariable Long userId) {
+        songService.deleteSongsByUser(userId);
+        return ResponseEntity.noContent().build();
+    }
 }

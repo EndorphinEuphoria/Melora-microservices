@@ -8,6 +8,8 @@ import com.github.music_service.repository.SongRepository;
 import com.github.music_service.repository.UploadRepository;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,9 @@ public class SongService {
     private final UserClientService userClientService; 
     private final UploadRepository uploadRepository;
     private final FavoriteRepository favoriteRepository;
+    private final RestTemplate restTemplate;
+
+    
 
     public SongDetailedDto getLightById(Long songId) {
     SongDetailedDto dto = songRepository.getLightById(songId);
@@ -31,7 +36,7 @@ public class SongService {
     }
     dto.setAudioBase64(null); 
     return dto;
-}
+    }
 
 
    private void applyBase64Conversion(SongDetailedDto s) {
@@ -105,41 +110,45 @@ public class SongService {
     songRepository.save(s);
 }
 
-public void banSong(Long songId, String reason) {
 
-    if (reason == null || reason.isBlank()) {
-        throw new IllegalArgumentException("Ban reason cannot be empty");
+    private void deleteSongFromPlaylists(Long songId) {
+        String url = "http://localhost:8085/api-v1/playlist-songs/deleteBySong/" + songId;
+        try {
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            System.err.println("No se pudo borrar la canción " + songId + " de playlist-songs: " + e.getMessage());
+        }
     }
 
-    // Buscar el upload asociado a la canción
-    List<Upload> uploads = uploadRepository.findBySongId(songId);
+    public void banSong(Long songId, String reason) {
 
-    if (uploads.isEmpty()) {
-        throw new NoSuchElementException("Upload not found for song: " + songId);
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("Ban reason cannot be empty");
+        }
+
+        List<Upload> uploads = uploadRepository.findBySongId(songId);
+
+        if (uploads.isEmpty()) {
+            throw new NoSuchElementException("Upload not found for song: " + songId);
+        }
+
+        Upload upload = uploads.get(0);
+
+        upload.setStateId(2L);
+        upload.setBanReason(reason);
+        upload.setBanDate(System.currentTimeMillis());
+
+        Song song = upload.getSong();
+        upload.setSong(null);
+
+        uploadRepository.save(upload);
+
+        deleteSongFromPlaylists(songId);
+
+        favoriteRepository.deleteBySongId(songId);
+
+        songRepository.delete(song);
     }
-
-    Upload upload = uploads.get(0);
-
-    // Actualizar el estado del upload
-    upload.setStateId(2L);
-    upload.setBanReason(reason);
-    upload.setBanDate(System.currentTimeMillis());
-
-    // *** ROMPER LA RELACIÓN PARA EVITAR TRANSIENT ERROR ***
-    Song song = upload.getSong();
-    upload.setSong(null);
-
-    // Guardar upload SIN relación a Song
-    uploadRepository.save(upload);
-
-    //borrar song de favorite
-    favoriteRepository.deleteBySongId(songId);
-
-    // Finalmente borrar song
-    songRepository.delete(song);
-}
-
-
 
     public boolean existsById(Long songId) {
     return songRepository.existsById(songId);
@@ -155,7 +164,37 @@ public void banSong(Long songId, String reason) {
     songRepository.delete(song);
 }
 
-   
-    
+    public void deleteSongsByUser(Long userId) {
 
+        List<Upload> uploads = uploadRepository.findByUserId(userId);
+
+        if (uploads.isEmpty()) {
+            return;
+        }
+
+        Set<Long> processedSongIds = new HashSet<>();
+
+        for (Upload upload : uploads) {
+            Song song = upload.getSong();
+
+            if (song != null) {
+                Long songId = song.getIdSong();
+
+                if (songId != null && processedSongIds.add(songId)) {
+                    
+                    deleteSongFromPlaylists(songId);
+                    favoriteRepository.deleteBySongId(songId);
+                    songRepository.delete(song);
+                }
+            }
+
+            uploadRepository.delete(upload);
+        }
+    }
 }
+
+
+
+
+
+   

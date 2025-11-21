@@ -55,8 +55,16 @@ public class playListSongsController {
 
         List<SongDto> songs = playListSongsServices.getSongsFromPlaylist(playlistId);
 
-        return ResponseEntity.ok(songs);
+                return ResponseEntity.ok(songs);
     }
+
+    @DeleteMapping("/deleteBySong/{songId}")
+    public ResponseEntity<Void> deleteBySong(@PathVariable Long songId) {
+    playListSongsServices.deleteBySong(songId);
+    return ResponseEntity.noContent().build();
+}
+
+
 }
 
 
