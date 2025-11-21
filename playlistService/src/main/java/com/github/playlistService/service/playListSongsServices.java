@@ -1,6 +1,7 @@
 package com.github.playlistService.service;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -22,18 +23,27 @@ public class playListSongsServices {
     @Autowired
     private RestTemplate restTemplate;
 
+    //  ENDPOINT CORRECTO QUE DEVUELVE LA CANCIÓN COMPLETA
+    private static final String SONG_SERVICE_URL = "http://localhost:8084/api-v1/songs/";
 
-    private static final String SONG_SERVICE_URL = "http://localhost:8084/api-v1/songs/exists/";
-    
+    //  ENDPOINT QUE VERIFICA EXISTENCIA (BOOLEANO)
+    private static final String SONG_EXISTS_URL = "http://localhost:8084/api-v1/songs/exists/";
+
+    // --------------------------------------------------------------------
+    //  VERIFICAR SI LA CANCIÓN EXISTE (BOOLEANO)
+    // --------------------------------------------------------------------
     public boolean songExists(Long songId) {
-    try {
-        Boolean exists = restTemplate.getForObject(SONG_SERVICE_URL + songId, Boolean.class);
-        return exists != null && exists;
-    } catch (Exception e) {
-        return false;
+        try {
+            Boolean exists = restTemplate.getForObject(SONG_EXISTS_URL + songId, Boolean.class);
+            return exists != null && exists;
+        } catch (Exception e) {
+            return false;
+        }
     }
-}
 
+    // --------------------------------------------------------------------
+    //  AGREGAR CANCIÓN A PLAYLIST
+    // --------------------------------------------------------------------
     public playListSongs addSongToPlaylist(playList playlist, Long songId) {
         if (!songExists(songId)) {
             throw new RuntimeException("La canción con ID " + songId + " no existe en el microservicio de música.");
@@ -46,16 +56,25 @@ public class playListSongsServices {
         return playListSongsRepository.save(relation);
     }
 
-    // Obtener canciones por playlist 
+    // --------------------------------------------------------------------
+    //  OBTENER CANCIONES DE UNA PLAYLIST (CORREGIDO)
+    // --------------------------------------------------------------------
     public List<SongDto> getSongsFromPlaylist(Long playlistId) {
-        List<playListSongs> relations = playListSongsRepository.findByPlaylist_IdPlaylist(playlistId);
+
+        List<playListSongs> relations =
+                playListSongsRepository.findByPlaylist_IdPlaylist(playlistId);
 
         return relations.stream()
                 .map(r -> {
+                    //  LLAMADA CORRECTA: devuelve SongDetailedDto como JSON → SongDto
                     String url = SONG_SERVICE_URL + r.getSongId();
-                    SongDto song = restTemplate.getForObject(url, SongDto.class);
-                    return song;
+                    return restTemplate.getForObject(url, SongDto.class);
                 })
                 .toList();
+    }
+
+        
+    public void deleteBySong(Long songId) {
+    playListSongsRepository.deleteBySongId(songId);
     }
 }

@@ -39,7 +39,7 @@ public class Upload {
     private Long banDate;
 
     @ManyToOne
-    @JoinColumn(name = "idSong", referencedColumnName = "idSong")
+    @JoinColumn(name = "id_song", referencedColumnName = "id_song")
     @Schema(description = "Canción asociada al upload")
     private Song song;
 }

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import com.github.music_service.model.Upload;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Repository
 public interface UploadRepository extends JpaRepository<Upload, Long> {
     @Query("SELECT u FROM Upload u WHERE u.userId = :userId")
@@ -20,8 +22,11 @@ public interface UploadRepository extends JpaRepository<Upload, Long> {
     @Query("SELECT u FROM Upload u WHERE u.song.idSong = :songId")
     List<Upload> findBySongId(Long songId);
     
+    
+    @Transactional
     @Modifying
     @Query("DELETE FROM Upload u WHERE u.song.idSong = :songId")
     void deleteBySongId(Long songId);
+
 }
 

@@ -37,7 +37,7 @@ public class User extends RepresentationModel<User> {
     private String password;
 
     @Lob
-    @Column(nullable = true, length = 255)
+    @Column(nullable = true,columnDefinition = "LONGBLOB")
     @Schema(description = "Foto de perfil en bytes (decodificada desde base64)")
     private byte[] profilePhotoUrl;
 

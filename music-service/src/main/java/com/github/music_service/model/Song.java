@@ -23,6 +23,7 @@ public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "ID único de la canción")
+    @Column(name = "id_song")
     private Long idSong;
 
     @Column(nullable = false)

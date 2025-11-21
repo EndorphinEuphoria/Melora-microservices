@@ -33,5 +33,8 @@ public class SongDto {
 
     @Schema(description = "ID del artista que creó o subió la canción", example = "7")
     private Long artistId;
+
+    private String coverArtBase64; 
+    private String audioBase64;
 }
 

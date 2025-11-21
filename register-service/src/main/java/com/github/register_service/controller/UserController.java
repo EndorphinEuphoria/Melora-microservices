@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.register_service.dto.UserDto;
@@ -51,6 +52,9 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = String.class)))
 })
 public ResponseEntity<?> addUser(@RequestBody UserDto dto) {
+    System.out.println("ROL RECIBIDO DESDE ANDROID = " + dto.getRolId());
+    System.out.println("DTO COMPLETO = " + dto);
+
     try {
         if (userService.getByMail(dto.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -63,7 +67,7 @@ public ResponseEntity<?> addUser(@RequestBody UserDto dto) {
         user.setPassword(dto.getPassword());
 
         Rol rol = new Rol();
-        rol.setIdRol(dto.getRolId() != null ? dto.getRolId() : 1L);
+        rol.setIdRol(dto.getRolId() != null ? dto.getRolId() : 2L);
         user.setRol(rol);
 
         User newUser = userService.saveUser(user, dto.getProfilePhotoBase64());
@@ -235,13 +239,12 @@ public ResponseEntity<?> updateUser(
         }
     }
 
-    
-   @PostMapping("/login")
+    @PostMapping("/login")
 public ResponseEntity<?> validateUsuario(@RequestBody User userRequest) {
     try {
 
         boolean isValid = userService.validateLogin(
-            userRequest.getEmail(), 
+            userRequest.getEmail(),
             userRequest.getPassword()
         );
 
@@ -260,10 +263,13 @@ public ResponseEntity<?> validateUsuario(@RequestBody User userRequest) {
         data.put("email", user.getEmail());
         data.put("nickname", user.getNickname());
         data.put("rolId", user.getRol().getIdRol());
-        data.put("profilePhotoBase64",
+        data.put("rolName", user.getRol().getNombre());  
+        data.put(
+            "profilePhotoBase64",
             user.getProfilePhotoUrl() != null
                 ? Base64.getEncoder().encodeToString(user.getProfilePhotoUrl())
-                : null);
+                : null
+        );
 
         body.put("data", data);
 
@@ -273,4 +279,34 @@ public ResponseEntity<?> validateUsuario(@RequestBody User userRequest) {
         throw new RuntimeException("Error al autenticar. " + e.getMessage());
     }
 }
+
+
+
+@GetMapping("/search")
+public ResponseEntity<?> searchUsers(@RequestParam("nickname") String nickname) {
+
+    try {
+        List<User> users = userService.searchByNickname(nickname);
+
+        List<Map<String, Object>> result = users.stream().map(user -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("idUser", user.getIdUser());
+            map.put("nickname", user.getNickname());
+            map.put("email", user.getEmail());
+            map.put("profilePhotoBase64",
+                user.getProfilePhotoUrl() != null
+                    ? Base64.getEncoder().encodeToString(user.getProfilePhotoUrl())
+                    : null
+            );
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(result);
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error al buscar usuarios: " + e.getMessage());
+    }
+}
+
 }

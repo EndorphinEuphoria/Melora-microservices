@@ -2,10 +2,14 @@ package com.github.music_service.service;
 
 import com.github.music_service.dto.SongDetailedDto;
 import com.github.music_service.model.Song;
+import com.github.music_service.model.Upload;
+import com.github.music_service.repository.FavoriteRepository;
 import com.github.music_service.repository.SongRepository;
 import com.github.music_service.repository.UploadRepository;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,20 +22,39 @@ public class SongService {
   private final SongRepository songRepository;
     private final UserClientService userClientService; 
     private final UploadRepository uploadRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final RestTemplate restTemplate;
 
-    private void applyBase64Conversion(SongDetailedDto s) {
-        if (s.getCoverArt() != null) {
-            s.setCoverArtBase64(
-                Base64.getEncoder().encodeToString(s.getCoverArt())
-            );
-        }
+    
 
-        if (s.getSongPathBase64() != null) {
-            s.setAudioBase64(
-                Base64.getEncoder().encodeToString(s.getSongPathBase64())
-            );
-        }
+    public SongDetailedDto getLightById(Long songId) {
+    SongDetailedDto dto = songRepository.getLightById(songId);
+    dto.setNickname(userClientService.getNicknameByUserId(dto.getArtistId()));
+    if (dto.getCoverArt() != null) {
+        dto.setCoverArtBase64(Base64.getEncoder().encodeToString(dto.getCoverArt()));
+        dto.setCoverArt(null);
     }
+    dto.setAudioBase64(null); 
+    return dto;
+    }
+
+
+   private void applyBase64Conversion(SongDetailedDto s) {
+    if (s.getCoverArt() != null) {
+        s.setCoverArtBase64(
+            Base64.getEncoder().encodeToString(s.getCoverArt())
+        );
+        s.setCoverArt(null);
+    }
+
+    if (s.getSongPathBase64() != null) {
+        s.setAudioBase64(
+            Base64.getEncoder().encodeToString(s.getSongPathBase64())
+        );
+        s.setSongPathBase64(null); 
+    }
+}
+
 
     public List<SongDetailedDto> getAllDetailed() {
         List<SongDetailedDto> songs = songRepository.findAllDetailed();
@@ -87,7 +110,45 @@ public class SongService {
     songRepository.save(s);
 }
 
-  
+
+    private void deleteSongFromPlaylists(Long songId) {
+        String url = "http://localhost:8085/api-v1/playlist-songs/deleteBySong/" + songId;
+        try {
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            System.err.println("No se pudo borrar la canción " + songId + " de playlist-songs: " + e.getMessage());
+        }
+    }
+
+    public void banSong(Long songId, String reason) {
+
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("Ban reason cannot be empty");
+        }
+
+        List<Upload> uploads = uploadRepository.findBySongId(songId);
+
+        if (uploads.isEmpty()) {
+            throw new NoSuchElementException("Upload not found for song: " + songId);
+        }
+
+        Upload upload = uploads.get(0);
+
+        upload.setStateId(2L);
+        upload.setBanReason(reason);
+        upload.setBanDate(System.currentTimeMillis());
+
+        Song song = upload.getSong();
+        upload.setSong(null);
+
+        uploadRepository.save(upload);
+
+        deleteSongFromPlaylists(songId);
+
+        favoriteRepository.deleteBySongId(songId);
+
+        songRepository.delete(song);
+    }
 
     public boolean existsById(Long songId) {
     return songRepository.existsById(songId);
@@ -103,7 +164,37 @@ public class SongService {
     songRepository.delete(song);
 }
 
-   
-    
+    public void deleteSongsByUser(Long userId) {
 
+        List<Upload> uploads = uploadRepository.findByUserId(userId);
+
+        if (uploads.isEmpty()) {
+            return;
+        }
+
+        Set<Long> processedSongIds = new HashSet<>();
+
+        for (Upload upload : uploads) {
+            Song song = upload.getSong();
+
+            if (song != null) {
+                Long songId = song.getIdSong();
+
+                if (songId != null && processedSongIds.add(songId)) {
+                    
+                    deleteSongFromPlaylists(songId);
+                    favoriteRepository.deleteBySongId(songId);
+                    songRepository.delete(song);
+                }
+            }
+
+            uploadRepository.delete(upload);
+        }
+    }
 }
+
+
+
+
+
+   

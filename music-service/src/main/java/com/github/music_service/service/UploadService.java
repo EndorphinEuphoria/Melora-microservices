@@ -7,11 +7,30 @@ import com.github.music_service.repository.SongRepository;
 import com.github.music_service.repository.UploadRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.imgscalr.Scalr;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.IIOImage;
+
+import org.imgscalr.Scalr;
+
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 
 
 @Service
@@ -44,6 +63,8 @@ public class UploadService {
             throw new IllegalArgumentException("User not found or unavailable in user-service");
         }
 
+        
+
         // CREAR SONG
         Song song = new Song();
         song.setSongName(dto.getSongName());
@@ -54,8 +75,11 @@ public class UploadService {
         song.setSongPathBase64(Base64.getDecoder().decode(dto.getSongPathBase64()));
 
         if (dto.getCoverArt() != null && !dto.getCoverArt().isBlank()) {
-            song.setCoverArt(Base64.getDecoder().decode(dto.getCoverArt()));
-        }
+        byte[] original = Base64.getDecoder().decode(dto.getCoverArt());
+        byte[] optimized = optimizeCoverArt(original);
+
+    song.setCoverArt(optimized);
+}
 
         Song savedSong = songRepository.save(song);
 
@@ -74,6 +98,34 @@ public class UploadService {
 
         return response;
     }
+
+    private byte[] optimizeCoverArt(byte[] originalBytes) {
+    try {
+        // 1. Convertir byte[] a imagen
+        BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(originalBytes));
+
+        // 2. Redimensionar (máximo 300 px lado mayor)
+        BufferedImage resizedImage = Scalr.resize(originalImage, 300);
+
+        // 3. Convertir a JPG y comprimir (70%)
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageWriter writer = ImageIO.getImageWritersByFormatName("jpeg").next();
+
+        ImageWriteParam param = writer.getDefaultWriteParam();
+        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(0.7f);
+
+        writer.setOutput(ImageIO.createImageOutputStream(baos));
+        writer.write(null, new IIOImage(resizedImage, null, null), param);
+        writer.dispose();
+
+        return baos.toByteArray();
+
+    } catch (Exception e) {
+        throw new RuntimeException("Could not optimize image: " + e.getMessage());
+    }
+}
+
 
 }
 

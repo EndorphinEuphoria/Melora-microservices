@@ -1,5 +1,7 @@
 package com.github.playlistService.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +12,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "Modelo que representa la categoría asociada a una playlist")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class categoria {
 
     @Id
