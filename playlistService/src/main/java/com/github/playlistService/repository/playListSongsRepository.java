@@ -12,11 +12,15 @@ import com.github.playlistService.model.playListSongs;
 
 @Repository
 public interface playListSongsRepository extends JpaRepository<playListSongs, Long> {
+
      List<playListSongs> findByPlaylist_IdPlaylist(Long idPlaylist);
-    void deleteByPlaylist_IdPlaylist(Long idPlaylist);
+
+     void deleteByPlaylist_IdPlaylist(Long playlistId);
 
     @Modifying
     @Query("DELETE FROM playListSongs ps WHERE ps.songId = :songId")
     void deleteBySongId(@Param("songId") Long songId);
+
+
 
 }

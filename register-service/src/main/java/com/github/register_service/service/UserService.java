@@ -28,6 +28,8 @@ public class UserService {
 
     private static final String MUSIC_SERVICE_URL = "http://localhost:8084/api-v1/songs";
 
+    private static final String PLAYLIST_SERVICE_URL = "http://localhost:8085/api-v1/playlists";
+
 
     public boolean validateLogin(String email, String rawPassword) {
 
@@ -39,7 +41,7 @@ public class UserService {
    User usuario = usuarioOpt.get();
 
     return passwordEncoder.matches(rawPassword, usuario.getPassword());
-}
+    }
 
 
     private String encrypt(String password) {
@@ -60,19 +62,28 @@ public class UserService {
 
     public Optional<User> getByMail(String email) {
     return userRepository.findByEmail(email);
-}
+    }
 
 
-   public void deleteUserById(Long userId) {
+    public void deleteUserById(Long userId) {
 
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+    try {
+        restTemplate.delete(PLAYLIST_SERVICE_URL + "/cleanup/user/" + userId);
+        System.out.println("Playlists y relaciones del usuario " + userId + " eliminadas en playlist-service.");
+    } catch (Exception e) {
+        System.err.println("Error al eliminar playlists del usuario " + userId + ": " + e.getMessage());
+    }
+
     try {
         restTemplate.delete(MUSIC_SERVICE_URL + "/by-user/" + userId);
         System.out.println("Canciones del usuario " + userId + " eliminadas en music-service.");
     } catch (Exception e) {
         System.err.println(" Error al eliminar canciones del usuario " + userId + ": " + e.getMessage());
     }
+
     userRepository.delete(user);
 }
 
@@ -133,7 +144,7 @@ public class UserService {
     }
 
     return userRepository.save(newUserInfo);
-}
+    }
 
 
     private byte[] decodeBase64(String Base64){
