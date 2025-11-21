@@ -8,9 +8,12 @@ import org.springframework.web.client.RestTemplate;
 import com.github.playlistService.DTO.PlayListRequestDto;
 import com.github.playlistService.DTO.UserDto;
 import com.github.playlistService.model.playList;
+import com.github.playlistService.model.playListUsers;
 import com.github.playlistService.repository.accesoRepository;
 import com.github.playlistService.repository.categoriaRepository;
 import com.github.playlistService.repository.playListRepository;
+import com.github.playlistService.repository.playListSongsRepository;
+import com.github.playlistService.repository.playListUsersRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -36,6 +39,12 @@ public class playListService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private playListUsersRepository playListUsersRepository;
+
+    @Autowired
+    private playListSongsRepository playListSongsRepository;
 
     private static final String USER_SERVICE_URL = "http://localhost:8082/api-v1/auth/exists/";
 
@@ -137,30 +146,43 @@ public class playListService {
         return playListRepository.findByUserId(userId);
     }
 
-    //Actualizar playlist
     public playList updatePlaylist(playList playlist) {
         return playListRepository.save(playlist);
     }
 
-    // Eliminar playlist
     public void deletePlaylist(Long idPlaylist) {
         playListRepository.deleteById(idPlaylist);
     }
 
-    //Obtener todas las playlists
     public List<playList> getAllPlaylists() {
         return playListRepository.findAll();
     }
 
-    //Buscar por nombre
     public List<playList> searchPlaylistsByName(String query) {
         return playListRepository.findByPlaylistNameContainingIgnoreCase(query);
     }
 
-    //Obtener por ID
+
     public Optional<playList> getPlaylistById(Long id) {
         return playListRepository.findById(id);
     }
+    
+    
+    public void cleanupUserData(Long userId) {
 
-        
+    List<playList> creadas = playListRepository.findByUserId(userId);
+
+    for (playList playlist : creadas) {
+
+        Long playlistId = playlist.getIdPlaylist();
+
+        playListSongsRepository.deleteByPlaylist_IdPlaylist(playlistId);
+
+        playListUsersRepository.deleteByPlaylist_IdPlaylist(playlistId);
+
+        playListRepository.deleteById(playlistId);
+    }
+
+    playListUsersRepository.deleteByUserId(userId);
+    }
 }

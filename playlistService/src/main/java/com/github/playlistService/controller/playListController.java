@@ -134,4 +134,10 @@ public class playListController {
                     .body("No se pudo eliminar la playlist: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/cleanup/user/{userId}")
+    public ResponseEntity<?> cleanupAllUserData(@PathVariable Long userId) {
+    playListService.cleanupUserData(userId);
+    return ResponseEntity.noContent().build();
+}
 }

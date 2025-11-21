@@ -9,12 +9,16 @@ import com.github.playlistService.model.playListUsers;
 
 @Repository
 public interface playListUsersRepository extends JpaRepository<playListUsers,Long> {
-   // Buscar todas las playlists de un usuario
+    
     List<playListUsers> findByUserId(Long userId);
 
-    // Eliminar una relación usuario-playlist
     void deleteByUserIdAndPlaylist_IdPlaylist(Long userId, Long idPlaylist);
 
-    // Verificar si ya existe la relación usuario-playlist
     boolean existsByUserIdAndPlaylist_IdPlaylist(Long userId, Long idPlaylist);
+
+    void deleteByPlaylist_IdPlaylist(Long playlistId);
+
+    void deleteByUserId(Long userId);
+
+    
 }
