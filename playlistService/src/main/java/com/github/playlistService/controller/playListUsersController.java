@@ -28,7 +28,6 @@ public class playListUsersController {
     private final playListUsersService playListUsersService;
     private final playListService playListService;
 
-    // SEGUIR PLAYLIST
     @Operation(summary = "Este endpoint permite a un usuario seguir una playlist.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "CREATED: La playlist ha sido añadida a la lista de seguimiento.",
@@ -60,7 +59,6 @@ public class playListUsersController {
         }
     }
 
-    // DEJAR DE SEGUIR PLAYLIST
     @Operation(summary = "Este endpoint permite a un usuario dejar de seguir una playlist.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "NO CONTENT: Se dejó de seguir la playlist correctamente."),
@@ -82,7 +80,6 @@ public class playListUsersController {
         }
     }
 
-    // VERIFICAR SI EL USUARIO SIGUE LA PLAYLIST
     @Operation(summary = "Este endpoint permite verificar si un usuario sigue una playlist.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK: Resultado obtenido correctamente.",
@@ -111,7 +108,6 @@ public class playListUsersController {
         }
     }
 
-    // OBTENER TODAS LAS PLAYLISTS SEGUIDAS POR UN USUARIO
     @Operation(summary = "Este endpoint permite obtener todas las playlists que un usuario sigue.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK: Playlists obtenidas correctamente.",
@@ -138,7 +134,6 @@ public class playListUsersController {
         }
     }
 
-    // TOGGLE FOLLOW
     @Operation(summary = "Este endpoint permite seguir o dejar de seguir una playlist automáticamente.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK: Estado actualizado correctamente.",
@@ -153,7 +148,6 @@ public class playListUsersController {
         return ResponseEntity.ok(result);
     }
 
-    // LISTAR TODAS LAS PLAYLISTS SEGUIDAS
     @Operation(summary = "Este endpoint permite obtener solo las playlists seguidas por un usuario.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK: Resultado obtenido correctamente."),

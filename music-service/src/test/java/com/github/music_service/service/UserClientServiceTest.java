@@ -1,46 +1,46 @@
 package com.github.music_service.service;
 
 import com.github.music_service.dto.UserResponseDto;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class UserClientServiceTest {
 
-    @Mock
-    private RestTemplate restTemplate;
+    @Mock private RestTemplate restTemplate;
 
     @InjectMocks
     private UserClientService userClientService;
 
     @Test
-    void getNicknameByUserId_returnsNickname() {
-        UserResponseDto response = new UserResponseDto();
-        response.setNickname("Lukas");
+    void getNickname_returnsNickname() {
+        UserResponseDto user = new UserResponseDto();
+        user.setNickname("Test");
 
         when(restTemplate.getForObject(anyString(), eq(UserResponseDto.class)))
-                .thenReturn(response);
+                .thenReturn(user);
 
-        String nickname = userClientService.getNicknameByUserId(1L);
+        String result = userClientService.getNicknameByUserId(1L);
 
-        assertThat(nickname).isEqualTo("Lukas");
+        assertEquals("Test", result);
     }
 
     @Test
-    void getNicknameByUserId_returnsDesconocidoOnError() {
+    void getNickname_returnsDesconocidoOnError() {
         when(restTemplate.getForObject(anyString(), eq(UserResponseDto.class)))
-                .thenThrow(new RuntimeException("Error"));
+                .thenThrow(new RuntimeException());
 
-        String nickname = userClientService.getNicknameByUserId(99L);
+        String result = userClientService.getNicknameByUserId(1L);
 
-        assertThat(nickname).isEqualTo("Desconocido");
+        assertEquals("Desconocido", result);
     }
 }
