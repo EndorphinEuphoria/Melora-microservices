@@ -21,9 +21,7 @@ public class SongController {
 
     private final SongService songService;
 
-    // -------------------------
-    // LISTAR TODAS (LIVIANO)
-    // -------------------------
+ 
     @Operation(
             summary = "Obtener todas las canciones detalladas (sin audio ni portadas pesadas)",
             description = "Ideal para listados rápidos en la app."
@@ -33,27 +31,19 @@ public class SongController {
         return ResponseEntity.ok(songService.getAllDetailed());
     }
 
-    // -------------------------
-    // VALIDAR EXISTENCIA
-    // -------------------------
+
     @Operation(summary = "Comprobar si una canción existe por su ID")
     @GetMapping("/exists/{songId}")
     public ResponseEntity<Boolean> exists(@PathVariable Long songId) {
         return ResponseEntity.ok(songService.existsById(songId));
     }
 
-    // -------------------------
-    // BÚSQUEDA POR NOMBRE
-    // -------------------------
     @Operation(summary = "Buscar canciones por nombre")
     @GetMapping("/search")
     public ResponseEntity<List<SongDetailedDto>> search(@RequestParam(defaultValue = "") String q) {
         return ResponseEntity.ok(songService.searchByName(q));
     }
 
-    // -------------------------
-    // DETALLE COMPLETO (CON AUDIO)
-    // -------------------------
     @Operation(summary = "Obtener canción detallada por ID (incluye audio y portada)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Canción encontrada"),
@@ -91,9 +81,7 @@ public class SongController {
         }
     }
 
-    // -------------------------
-    // ELIMINAR CANCIÓN
-    // -------------------------
+
     @Operation(summary = "Eliminar una canción por ID")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Canción eliminada correctamente"),
@@ -110,9 +98,7 @@ public class SongController {
         }
     }
 
-    // -------------------------
-    // BANEAR CANCIÓN
-    // -------------------------
+
     @PostMapping("/{songId}/ban")
     public ResponseEntity<?> banSong(
             @PathVariable Long songId,

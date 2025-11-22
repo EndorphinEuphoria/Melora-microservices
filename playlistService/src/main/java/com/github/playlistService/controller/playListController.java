@@ -11,7 +11,15 @@ import com.github.playlistService.DTO.PlayListRequestDto;
 import com.github.playlistService.model.playList;
 import com.github.playlistService.service.playListService;
 import com.github.playlistService.service.playListSongsServices;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("api-v1/playlists")
 @RequiredArgsConstructor
@@ -20,9 +28,14 @@ public class playListController {
     private final playListService playListService;
     private final playListSongsServices playListSongsServices;
 
-    // ---------------------------------------
-    // 1. CREAR PLAYLIST  (POST /api-v1/playlists/create)
-    // ---------------------------------------
+
+    @Operation(summary = "Este endpoint permite crear una playlist completa con categoría, acceso y canciones.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "CREATED: Playlist creada correctamente.",
+                content = @Content(schema = @Schema(implementation = playList.class))),
+        @ApiResponse(responseCode = "400", description = "BAD REQUEST: Error al crear la playlist.",
+                content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @PostMapping("/create")
     public ResponseEntity<?> createPlaylist(@RequestBody PlayListRequestDto dto) {
         try {
@@ -40,17 +53,24 @@ public class playListController {
         }
     }
 
-    // ---------------------------------------
-    // 2. OBTENER TODAS LAS PLAYLISTS (GET /api-v1/playlists/getAll)
-    // ---------------------------------------
+    @Operation(summary = "Obtiene todas las playlists registradas.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "OK: Listado devuelto correctamente.",
+                content = @Content(schema = @Schema(implementation = playList.class)))
+    })
     @GetMapping("/getAll")
     public ResponseEntity<List<playList>> getAllPlaylists() {
         return ResponseEntity.ok(playListService.getAllPlaylists());
     }
 
-    // ---------------------------------------
-    // 3. OBTENER PLAYLIST POR ID (GET /api-v1/playlists/get/{id})
-    // ---------------------------------------
+
+    @Operation(summary = "Obtiene una playlist por su ID.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "OK: Playlist encontrada.",
+                content = @Content(schema = @Schema(implementation = playList.class))),
+        @ApiResponse(responseCode = "404", description = "NOT FOUND: No existe la playlist.",
+                content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getPlaylistById(@PathVariable Long id) {
 
@@ -60,17 +80,23 @@ public class playListController {
                         .body("Playlist con ID " + id + " no encontrada."));
     }
 
-    // ---------------------------------------
-    // 4. OBTENER CANCIONES DE UNA PLAYLIST (GET /api-v1/playlists/get/{id}/songs)
-    // ---------------------------------------
+    @Operation(summary = "Obtiene todas las canciones de una playlist.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "OK: Canciones obtenidas correctamente.")
+    })
     @GetMapping("/get/{id}/songs")
     public ResponseEntity<?> getSongsFromPlaylist(@PathVariable Long id) {
         return ResponseEntity.ok(playListSongsServices.getSongsFromPlaylist(id));
     }
 
-    // ---------------------------------------
-    // 5. PLAYLISTS DE UN USUARIO (GET /api-v1/playlists/user/{userId})
-    // ---------------------------------------
+
+    @Operation(summary = "Obtiene todas las playlists creadas por un usuario.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "OK: Listado obtenido.",
+                content = @Content(schema = @Schema(implementation = playList.class))),
+        @ApiResponse(responseCode = "404", description = "NOT FOUND: El usuario no tiene playlists.",
+                content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getPlaylistsByUser(@PathVariable Long userId) {
 
@@ -84,17 +110,26 @@ public class playListController {
         return ResponseEntity.ok(playlists);
     }
 
-    // ---------------------------------------
-    // 6. BUSCAR PLAYLIST POR NOMBRE (GET /api-v1/playlists/search?name=texto)
-    // ---------------------------------------
+
+    @Operation(summary = "Busca playlists por coincidencia de nombre.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "OK: Resultados devueltos correctamente.")
+    })
     @GetMapping("/search")
     public ResponseEntity<List<playList>> searchPlaylistsByName(@RequestParam String name) {
         return ResponseEntity.ok(playListService.searchPlaylistsByName(name));
     }
 
-    // ---------------------------------------
-    // 7. ACTUALIZAR PLAYLIST (PUT /api-v1/playlists/update/{id})
-    // ---------------------------------------
+
+    @Operation(summary = "Actualiza una playlist completa por su ID.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "OK: Playlist actualizada correctamente.",
+                content = @Content(schema = @Schema(implementation = playList.class))),
+        @ApiResponse(responseCode = "404", description = "NOT FOUND: No existe la playlist.",
+                content = @Content(schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "400", description = "BAD REQUEST: Error al actualizar.",
+                content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updatePlaylist(@PathVariable Long id, @RequestBody playList updatedPlaylist) {
 
@@ -119,9 +154,13 @@ public class playListController {
         }
     }
 
-    // ---------------------------------------
-    // 8. ELIMINAR PLAYLIST (DELETE /api-v1/playlists/delete/{id})
-    // ---------------------------------------
+
+    @Operation(summary = "Elimina una playlist por su ID.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "NO CONTENT: Eliminada correctamente."),
+        @ApiResponse(responseCode = "404", description = "NOT FOUND: No existe la playlist.",
+                content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deletePlaylist(@PathVariable Long id) {
 
@@ -135,9 +174,13 @@ public class playListController {
         }
     }
 
+    @Operation(summary = "Elimina todas las playlists y relaciones asociadas a un usuario.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "NO CONTENT: Datos limpiados correctamente.")
+    })
     @DeleteMapping("/cleanup/user/{userId}")
     public ResponseEntity<?> cleanupAllUserData(@PathVariable Long userId) {
-    playListService.cleanupUserData(userId);
-    return ResponseEntity.noContent().build();
-}
+        playListService.cleanupUserData(userId);
+        return ResponseEntity.noContent().build();
+    }
 }

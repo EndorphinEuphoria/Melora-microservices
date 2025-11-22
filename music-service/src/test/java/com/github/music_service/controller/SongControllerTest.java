@@ -36,19 +36,20 @@ public class SongControllerTest {
     // GET ALL
     @Test
     void listAllSongs_thenReturnOk() {
-        SongDetailedDto dto = new SongDetailedDto();
-        dto.setSongName("Test Song");
+    SongDetailedDto dto = new SongDetailedDto();
+    dto.setSongName("Test Song");
 
-        when(songService.getAllDetailed()).thenReturn(List.of(dto));
+    when(songService.getAllDetailed()).thenReturn(List.of(dto));
 
-        try {
-            mockMvc.perform(get("/api-v1/songs"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").isArray());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    try {
+        mockMvc.perform(get("/api-v1/songs/getAll"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
+
 
     // EXISTS
     @Test

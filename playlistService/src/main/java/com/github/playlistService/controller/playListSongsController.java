@@ -3,13 +3,22 @@ package com.github.playlistService.controller;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+
 import com.github.playlistService.DTO.SongDto;
 import com.github.playlistService.model.playList;
 import com.github.playlistService.model.playListSongs;
 import com.github.playlistService.service.playListSongsServices;
 import com.github.playlistService.service.playListService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,6 +32,13 @@ public class playListSongsController {
     // -------------------------------------------------------------------
     // AGREGAR CANCIÓN A PLAYLIST
     // -------------------------------------------------------------------
+    @Operation(summary = "Agrega una canción a una playlist existente.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "CREATED: Canción agregada correctamente.",
+                content = @Content(schema = @Schema(implementation = playListSongs.class))),
+        @ApiResponse(responseCode = "400", description = "BAD REQUEST: Error al agregar la canción.",
+                content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @PostMapping("/{playlistId}/add/{songId}")
     public ResponseEntity<?> addSongToPlaylist(
             @PathVariable Long playlistId,
@@ -46,25 +62,28 @@ public class playListSongsController {
         }
     }
 
-    // -------------------------------------------------------------------
-    // OBTENER CANCIONES DE UNA PLAYLIST  → SIEMPRE LISTA (NO 404)
-    // -------------------------------------------------------------------
+   
+    @Operation(summary = "Obtiene todas las canciones pertenecientes a una playlist.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "OK: Lista obtenida correctamente.")
+    })
     @GetMapping("/{playlistId}/songs")
     public ResponseEntity<List<SongDto>> getSongsFromPlaylist(
             @PathVariable Long playlistId) {
 
         List<SongDto> songs = playListSongsServices.getSongsFromPlaylist(playlistId);
 
-                return ResponseEntity.ok(songs);
+        return ResponseEntity.ok(songs);
     }
 
+    @Operation(summary = "Elimina una canción de todas las playlists en las que esté incluida.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "NO CONTENT: Canción eliminada correctamente.")
+    })
     @DeleteMapping("/deleteBySong/{songId}")
     public ResponseEntity<Void> deleteBySong(@PathVariable Long songId) {
-    playListSongsServices.deleteBySong(songId);
-    return ResponseEntity.noContent().build();
+        playListSongsServices.deleteBySong(songId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
-
-
-}
-
-
