@@ -30,7 +30,8 @@
             "mainClass": "com.github.register_service.RegisterApiApplication",
             "projectName": "register-service",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=63657 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=register-service"
         },
         {
             "type": "java",
@@ -39,6 +40,16 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.github.login_service.LoginApiApplication",
             "projectName": "login-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-RecoverPassApiApplication<recoverpass-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.github.recoverpass_service.RecoverPassApiApplication",
+            "projectName": "recoverpass-service",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

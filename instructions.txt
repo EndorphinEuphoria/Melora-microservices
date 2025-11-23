@@ -1,0 +1,18 @@
+| Microservicio      | Puerto | Base de datos                                      |
+|--------------------|--------|----------------------------------------------------|
+| register-service   |  8082  | melora_auth                                        |
+|recoverPass-service |  8083  | melora_recoverpass                                 |  
+| song-service       |  8084  | melora_song                                        |
+| playlist-service   |  8085  | melora_playlist                                    |
+|                    |        |                                                    |    
+
+
+/* Importante Cambiar*/
+
+Xampp viene con max_allowed_packet=1M por defecto
+para que acepte las canciones codificadas hay que cambiarlo en el archivo 
+My.ini 
+ 
+Path C:\xampp\mysql\bin\my.ini
+
+Cambiar [mysqld] max_allowed_packet=512Mx
