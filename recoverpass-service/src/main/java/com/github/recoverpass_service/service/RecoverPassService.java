@@ -52,7 +52,7 @@ public class RecoverPassService {
 
 
     // send email
-    private void sendEmail(String email, String token) {
+    public void sendEmail(String email, String token) {
         String body = "Copy this code into the application to reset your password.\n" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();

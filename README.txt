@@ -14,12 +14,13 @@
 
 Instrucciones para el manejo y uso de Melora-Microservicios:
 
-| Microservicio      | Puerto | Nombre de la base de datos                         |
-|--------------------|--------|----------------------------------------------------|
-| register-service   |  8082  | melora_auth                                        |
-| song-service       |  8084  | melora_song                                        |
-| playlist-service   |  8085  | melora_playlist                                    |
-|                    |        |                                                    |    
+| Microservicio       | Puerto | Nombre de la base de datos                         |
+|---------------------|--------|----------------------------------------------------|
+| register-service    |  8082  | melora_auth                                        |
+| recoverPass-service |  8083  | melora_recoverpass                                 |  
+| song-service        |  8084  | melora_song                                        |
+| playlist-service    |  8085  | melora_playlist                                    |
+|                     |        |                                                    |    
 
 
 Aclaraciones importantes respecto a la base de Datos Xampp:

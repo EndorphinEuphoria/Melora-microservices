@@ -97,6 +97,20 @@ public ResponseEntity<?> addUser(@RequestBody UserDto dto) {
 }
 
 
+    @PutMapping("/resetPassword/{userId}")
+    @Operation(summary = "Este endpoint permite actualizar la contraseña de un usuario por su ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK: la contraseña ha sido actualizada con éxito.",
+                    content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST: indica que el cuerpo de la petición es inválido.",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "NOT FOUND: indica que no existe un usuario con el ID proporcionado.",
+                    content = @Content)})
+    public ResponseEntity<String> resetPassword(@PathVariable Long userId, @RequestBody Map<String, String> body) {
+            String newPassword = body.get("newPassword");
+            userService.resetPasswordById(userId, newPassword);
+            return ResponseEntity.ok("Password updated");
+    }
 
     @Operation( summary = "Este endpoint permite comprobar la existencia de un usuario por email.")
     @ApiResponses(value = {

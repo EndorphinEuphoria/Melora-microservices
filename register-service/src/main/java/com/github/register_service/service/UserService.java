@@ -156,6 +156,17 @@ public class UserService {
         return userRepository.searchByNickname(nickname);
     }
 
-    
+        // Recover pass métodos SERVICE
+    public void resetPasswordById(Long userId, String newPassword) {
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String encoded = passwordEncoder.encode(newPassword);
+        user.setPassword(encoded);
+
+        userRepository.save(user);
+    }
+
 
 }
