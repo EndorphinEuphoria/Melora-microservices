@@ -26,6 +26,11 @@ Instrucciones para el manejo y uso de Melora-Microservicios:
 Para recoverPass, se implementó un método local en el cuál se envía a través de smtp,
 usuario y contraseña de aplicación -> (se necesita autenticación de doble paso para esto)
 un correo con la clave necesaria para cambiar la contraseña.
+1. Ingresar a https://myaccount.google.com/apppasswords
+2. Ingresar nombre de app y crear
+3. Copiar contraseña y pegar en spring.mail.password en el properties de recoverpass-service sin espacios, ej: djfe ejdo ejds wngp quedaría así -> djfeejdoejdswngp
+4. Ingresar email en spring.mail.username
+
 
 Aclaraciones importantes respecto a la base de Datos Xampp:
 Xampp viene con max_allowed_packet=1M por defecto.Para que acepte las canciones codificadas
